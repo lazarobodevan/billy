@@ -2,8 +2,21 @@ import 'package:billy/theme/colors.dart';
 import 'package:billy/theme/typography.dart';
 import 'package:flutter/material.dart';
 
-class ToggleTransactionType extends StatelessWidget {
+class ToggleTransactionType extends StatefulWidget {
   const ToggleTransactionType({super.key});
+
+  @override
+  State<ToggleTransactionType> createState() => _ToggleTransactionTypeState();
+}
+
+class _ToggleTransactionTypeState extends State<ToggleTransactionType> {
+  var selected = 1;
+
+  onSelect(value){
+    setState(() {
+      selected = value;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,11 +25,11 @@ class ToggleTransactionType extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          TransactionTypeItem("Despesa", () {}, true),
+          TransactionTypeItem("Despesa", () {onSelect(0);}, selected == 0),
           const SizedBox(
             width: 1,
           ),
-          TransactionTypeItem("Receita", () {}, false),
+          TransactionTypeItem("Receita", () {onSelect(1);}, selected == 1),
         ],
       ),
     );
@@ -26,6 +39,7 @@ class ToggleTransactionType extends StatelessWidget {
 Widget TransactionTypeItem(String text, Function onTap, bool? isSelected) {
   return Expanded(
     child: InkWell(
+      splashColor: Colors.transparent,
       onTap: () {
         onTap();
       },

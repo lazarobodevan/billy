@@ -1,3 +1,4 @@
+import 'package:billy/screens/add_transaction/components/category_selector.dart';
 import 'package:billy/screens/add_transaction/components/digit_button.dart';
 import 'package:billy/screens/add_transaction/components/toggle_transaction_type.dart';
 import 'package:billy/theme/colors.dart';
@@ -10,7 +11,22 @@ class AddTransaction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var screenHeight = MediaQuery.of(context).size.height;
+    var screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: ThemeColors.primary1,
+        foregroundColor: Colors.white,
+        actions: [
+          InkWell(
+            onTap: () {},
+            child: Ink(
+              padding: EdgeInsets.all(16),
+              child: Icon(Icons.check),
+            ),
+          )
+        ],
+      ),
       backgroundColor: ThemeColors.primary2,
       body: SafeArea(
         child: SizedBox(
@@ -24,29 +40,34 @@ class AddTransaction extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: ThemeColors.primary1,
                 ),
-                child: TextField(
-                  decoration: const InputDecoration(
-                    hintText: 'R\$00,00',
-                    focusedBorder: InputBorder.none,
-                    border: InputBorder.none,
-                    hintStyle: TextStyle(
-                      color: ThemeColors.primary3,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextField(
+                      decoration: const InputDecoration(
+                          hintText: 'R\$00,00',
+                          focusedBorder: InputBorder.none,
+                          border: InputBorder.none,
+                          hintStyle: TextStyle(
+                            color: ThemeColors.primary3,
+                          ),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 16)),
+                      textAlign: TextAlign.right,
+                      style: TypographyStyles.paragraph1().copyWith(
+                        fontSize: screenHeight * .11,
+                        color: ThemeColors.primary3,
+                      ),
+                      inputFormatters: [
+                        CurrencyTextInputFormatter.currency(
+                          locale: 'pt-BR',
+                          symbol: "R\$",
+                          minValue: 0,
+                        )
+                      ],
+                      keyboardType: TextInputType.none,
                     ),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 16)
-                  ),
-                  style: TypographyStyles.paragraph1().copyWith(
-                    fontSize: 100,
-                    height: 3,
-                    color: ThemeColors.primary3,
-                  ),
-                  inputFormatters: [
-                    CurrencyTextInputFormatter.currency(
-                      locale: 'pt-BR',
-                      symbol: "R\$",
-                      minValue: 0,
-                    )
+                    CategorySelector()
                   ],
-                  keyboardType: TextInputType.none,
                 ),
               ),
               Expanded(
