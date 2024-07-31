@@ -1,4 +1,4 @@
-import 'package:billy/screens/add_transaction/components/category_selector.dart';
+import 'package:billy/screens/add_transaction/components/payment_method_selector.dart';
 import 'package:billy/screens/add_transaction/components/digit_button.dart';
 import 'package:billy/screens/add_transaction/components/toggle_transaction_type.dart';
 import 'package:billy/theme/colors.dart';
@@ -66,7 +66,7 @@ class AddTransaction extends StatelessWidget {
                       ],
                       keyboardType: TextInputType.none,
                     ),
-                    CategorySelector()
+                    PaymentMethodSelector()
                   ],
                 ),
               ),

@@ -1,4 +1,5 @@
 import 'package:billy/screens/add_transaction/add_transaction.dart';
+import 'package:billy/screens/categories/categories.dart';
 import 'package:billy/screens/nav_pages/home/home.dart';
 import 'package:billy/screens/nav_pages/nav_page.dart';
 import 'package:flutter/material.dart';
@@ -36,7 +37,8 @@ class MyApp extends StatelessWidget {
       ),
       home: NavigationPage(),
       routes: {
-        "/transaction":(context) => const AddTransaction()
+        "/transaction":(context) => const AddTransaction(),
+        "/categories": (context) => const Categories()
       },
     );
   }

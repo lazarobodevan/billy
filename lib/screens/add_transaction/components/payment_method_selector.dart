@@ -2,8 +2,8 @@ import 'package:billy/theme/colors.dart';
 import 'package:billy/theme/typography.dart';
 import 'package:flutter/material.dart';
 
-class CategorySelector extends StatelessWidget {
-  const CategorySelector({super.key});
+class PaymentMethodSelector extends StatelessWidget {
+  const PaymentMethodSelector({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +57,9 @@ class CategorySelector extends StatelessWidget {
           ),
           Expanded(
             child: InkWell(
-              onTap: () {},
+              onTap: () {
+                Navigator.of(context).pushNamed("/categories");
+              },
               child: Ink(
                 height: 60,
                 decoration: BoxDecoration(color: ThemeColors.primary1),
