@@ -26,3 +26,22 @@ class EraseValue extends AddTransactionEvent{
   List<Object?> get props => [];
 
 }
+
+class ChangeTransactionType extends AddTransactionEvent{
+  final TransactionType transactionType;
+
+  const ChangeTransactionType({required this.transactionType});
+
+  @override
+  List<Object?> get props => [transactionType];
+}
+
+class ChangePaymentMethod extends AddTransactionEvent{
+  final PaymentMethod paymentMethod;
+
+  const ChangePaymentMethod({required this.paymentMethod});
+
+  @override
+  List<Object?> get props => [paymentMethod];
+
+}

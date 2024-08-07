@@ -1,6 +1,6 @@
-import 'package:billy/repository/database_helper.dart';
-import 'package:billy/transaction/models/transaction_model.dart';
-import 'package:billy/transaction/repository/i_transaction_repository.dart';
+import 'package:billy/repositories/database_helper.dart';
+import 'package:billy/models/transaction/transaction_model.dart';
+import 'package:billy/repositories/transaction/i_transaction_repository.dart';
 
 class TransactionRepository implements ITransactionRepository{
   final DatabaseHelper _databaseHelper = DatabaseHelper.instance;

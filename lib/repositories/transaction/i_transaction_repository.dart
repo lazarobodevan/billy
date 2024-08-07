@@ -1,4 +1,4 @@
-import 'package:billy/transaction/models/transaction_model.dart';
+import 'package:billy/models/transaction/transaction_model.dart';
 
 abstract class ITransactionRepository{
 

@@ -1,5 +1,5 @@
-import 'package:billy/transaction/models/transaction_model.dart';
-import 'package:billy/transaction/repository/i_transaction_repository.dart';
+import 'package:billy/models/transaction/transaction_model.dart';
+import 'package:billy/repositories/transaction/i_transaction_repository.dart';
 
 class CreateTransactionUseCase{
   final ITransactionRepository transactionRepository;

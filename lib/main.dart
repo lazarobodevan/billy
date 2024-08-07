@@ -2,8 +2,8 @@ import 'package:billy/presentation/screens/add_transaction/add_transaction.dart'
 import 'package:billy/presentation/screens/add_transaction/bloc/add_transaction_bloc.dart';
 import 'package:billy/presentation/screens/categories/categories.dart';
 import 'package:billy/presentation/screens/nav_pages/nav_page.dart';
-import 'package:billy/repository/database_helper.dart';
-import 'package:billy/transaction/repository/transaction_repository.dart';
+import 'package:billy/repositories/database_helper.dart';
+import 'package:billy/repositories/transaction/transaction_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
