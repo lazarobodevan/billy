@@ -46,7 +46,7 @@ class DatabaseHelper {
         name TEXT NOT NULL,
         icon TEXT,
         max REAL,
-        color TEXT,
+        color INT,
         subcategory_id INTEGER,
         FOREIGN KEY (subcategory_id) REFERENCES subcategories(id)
       );
@@ -56,6 +56,7 @@ class DatabaseHelper {
       CREATE TABLE subcategories (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
+        icon INT,
         color TEXT,
         max REAL
       );

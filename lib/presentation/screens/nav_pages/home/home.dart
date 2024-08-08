@@ -1,4 +1,4 @@
-import 'package:billy/presentation/screens/nav_pages/home/components/action_button.dart';
+import 'package:billy/presentation/shared/components/action_button.dart';
 import 'package:billy/presentation/shared/components/transaction_item.dart';
 import 'package:billy/presentation/theme/colors.dart';
 import 'package:billy/presentation/theme/typography.dart';
@@ -113,7 +113,7 @@ class Home extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Flexible(
-                          child: HomeActionButton(
+                          child: ActionButton(
                         text: "Pagar",
                         icon: Icons.payments_sharp,
                         onTap: () {
@@ -124,7 +124,7 @@ class Home extends StatelessWidget {
                         width: 40,
                       ),
                       Flexible(
-                          child: HomeActionButton(
+                          child: ActionButton(
                         text: "Receber",
                         icon: Icons.add_circle,
                         onTap: () {

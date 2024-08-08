@@ -6,4 +6,7 @@ class ThemeColors{
   static const Color primary3 =  Color(0xFFFFFFFF);
 
   static const Color secondary1 =  Color(0xFF466EFF);
+
+  static const Color semanticYellow = Color(0xfffcbf49);
+  static const Color semanticRed = Color(0xffd62828);
 }

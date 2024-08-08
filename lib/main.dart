@@ -1,7 +1,9 @@
 import 'package:billy/presentation/screens/add_transaction/add_transaction.dart';
 import 'package:billy/presentation/screens/add_transaction/bloc/add_transaction_bloc.dart';
-import 'package:billy/presentation/screens/categories/categories.dart';
+import 'package:billy/presentation/screens/nav_pages/categories/bloc/category_bloc.dart';
+import 'package:billy/presentation/screens/nav_pages/categories/categories.dart';
 import 'package:billy/presentation/screens/nav_pages/nav_page.dart';
+import 'package:billy/repositories/category/category_repository.dart';
 import 'package:billy/repositories/database_helper.dart';
 import 'package:billy/repositories/transaction/transaction_repository.dart';
 import 'package:flutter/material.dart';
@@ -24,12 +26,18 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         RepositoryProvider(create: (context) => TransactionRepository()),
+        RepositoryProvider(create: (context) => CategoryRepository()),
         BlocProvider(
           create: (context) => AddTransactionBloc(
             transactionRepository:
                 RepositoryProvider.of<TransactionRepository>(context),
           ),
-        )
+        ),
+        BlocProvider(
+          create: (context) => CategoryBloc(
+            RepositoryProvider.of<CategoryRepository>(context),
+          ),
+        ),
       ],
       child: MaterialApp(
         title: 'Flutter Demo',
@@ -55,7 +63,7 @@ class MyApp extends StatelessWidget {
         home: NavigationPage(),
         routes: {
           "/transaction": (context) => AddTransaction(),
-          "/categories": (context) => const Categories()
+          "/categories": (context) => Categories()
         },
       ),
     );

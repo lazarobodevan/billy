@@ -1,6 +1,6 @@
-import '../../models/category/category.dart';
+import '../../models/category/transaction_category.dart';
 
 abstract class ICategoryRepository{
-  Future<Category> create(Category category);
-  Future<List<Category>?> getAll();
+  Future<TransactionCategory> create(TransactionCategory category);
+  Future<List<TransactionCategory>?> getAll();
 }
