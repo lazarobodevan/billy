@@ -55,3 +55,22 @@ class DeleteCategoryEvent extends CategoryEvent{
   @override
   List<Object?> get props => [];
 }
+
+class UpdateCategoryEvent extends CategoryEvent{
+  final TransactionCategory category;
+
+  const UpdateCategoryEvent({required this.category});
+
+  @override
+  List<Object?> get props => [category];
+}
+
+class UpdateCategoryWithSubcategoryEvent extends CategoryEvent{
+  final Subcategory subcategory;
+
+  const UpdateCategoryWithSubcategoryEvent({required this.subcategory});
+
+  @override
+  List<Object?> get props => [subcategory];
+
+}

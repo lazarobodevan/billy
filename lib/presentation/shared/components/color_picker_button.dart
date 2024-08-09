@@ -5,7 +5,8 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 class ColorPickerButton extends StatefulWidget {
   final Function onColorChanged;
-  const ColorPickerButton({super.key, required this.onColorChanged});
+  final Color? initalColor;
+  const ColorPickerButton({super.key, required this.onColorChanged, this.initalColor});
 
   @override
   State<ColorPickerButton> createState() => _ColorPickerButtonState();
@@ -14,6 +15,15 @@ class ColorPickerButton extends StatefulWidget {
 class _ColorPickerButtonState extends State<ColorPickerButton> {
   Color? currentColor;
   bool isColorSelected = false;
+
+  @override
+  void initState() {
+    if(widget.initalColor != null){
+      currentColor = widget.initalColor;
+      isColorSelected = true;
+    }
+    super.initState();
+  }
 
   void onCofirmColor(Color color) {
     setState(() {

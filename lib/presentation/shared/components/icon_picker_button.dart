@@ -7,8 +7,9 @@ import 'package:flutter_iconpicker/flutter_iconpicker.dart';
 
 class IconPickerButton extends StatefulWidget {
   final Function onChangedIcon;
+  final IconData? initialIcon;
 
-  const IconPickerButton({super.key, required this.onChangedIcon});
+  const IconPickerButton({super.key, required this.onChangedIcon, this.initialIcon});
 
   @override
   State<IconPickerButton> createState() => _IconPickerButtonState();
@@ -16,6 +17,14 @@ class IconPickerButton extends StatefulWidget {
 
 class _IconPickerButtonState extends State<IconPickerButton> {
   IconData? currentIconData;
+
+  @override
+  void initState() {
+    if(widget.initialIcon != null){
+      currentIconData = widget.initialIcon;
+    }
+    super.initState();
+  }
 
   void onCofirmIcon(IconData iconData) {
     setState(() {

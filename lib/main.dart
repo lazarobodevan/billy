@@ -1,10 +1,12 @@
 import 'package:billy/presentation/screens/add_transaction/add_transaction.dart';
 import 'package:billy/presentation/screens/add_transaction/bloc/add_transaction_bloc.dart';
-import 'package:billy/presentation/screens/nav_pages/categories/bloc/category_bloc.dart';
 import 'package:billy/presentation/screens/nav_pages/categories/categories.dart';
+import 'package:billy/presentation/screens/nav_pages/categories/category_bloc/category_bloc.dart';
+import 'package:billy/presentation/screens/nav_pages/categories/subcategory_bloc/subcategory_bloc.dart';
 import 'package:billy/presentation/screens/nav_pages/nav_page.dart';
 import 'package:billy/repositories/category/category_repository.dart';
 import 'package:billy/repositories/database_helper.dart';
+import 'package:billy/repositories/subcategory/subcategory_repository.dart';
 import 'package:billy/repositories/transaction/transaction_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -27,6 +29,7 @@ class MyApp extends StatelessWidget {
       providers: [
         RepositoryProvider(create: (context) => TransactionRepository()),
         RepositoryProvider(create: (context) => CategoryRepository()),
+        RepositoryProvider(create: (context) => SubcategoryRepository()),
         BlocProvider(
           create: (context) => AddTransactionBloc(
             transactionRepository:
@@ -36,6 +39,12 @@ class MyApp extends StatelessWidget {
         BlocProvider(
           create: (context) => CategoryBloc(
             RepositoryProvider.of<CategoryRepository>(context),
+          ),
+        ),
+        BlocProvider(
+          create: (context) => SubcategoryBloc(
+            categoryBloc: BlocProvider.of<CategoryBloc>(context),
+            repository: RepositoryProvider.of<SubcategoryRepository>(context),
           ),
         ),
       ],
