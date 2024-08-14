@@ -72,7 +72,14 @@ class MyApp extends StatelessWidget {
         home: NavigationPage(),
         routes: {
           "/transaction": (context) => AddTransaction(),
-          "/categories": (context) => Categories()
+        },
+        onGenerateRoute: (settings) {
+          if (settings.name == '/categories') {
+            return MaterialPageRoute(
+                builder: (context) => Categories(
+                      isSelectableCategories: settings.arguments as bool,
+                    ));
+          }
         },
       ),
     );

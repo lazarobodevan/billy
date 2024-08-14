@@ -1,11 +1,12 @@
 import 'package:billy/enums/transaction/payment_method.dart';
 import 'package:billy/enums/transaction/transaction_type.dart';
+import 'package:billy/models/category/transaction_category.dart';
 
 class Transaction {
   final int? id;
   String name;
   double value;
-  String category;
+  TransactionCategory? category;
   TransactionType type;
   PaymentMethod paymentMethod;
   DateTime date;
@@ -27,37 +28,79 @@ class Transaction {
     this.id,
     this.name = "",
     this.value = 0,
-    this.category = "",
+    TransactionCategory? category,
     this.type = TransactionType.EXPENSE,
     this.paymentMethod = PaymentMethod.PIX,
     DateTime? date,
     this.endDate,
     this.isPaid,
-  }) : date = date ?? DateTime.now();
+  })  : category = TransactionCategory.empty(),
+        date = date ?? DateTime.now();
+
+  _getIsPaidToDatabase() {
+    if (isPaid == null) return isPaid;
+
+    if (isPaid == true) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
+
+  Transaction copyWith({
+    int? id,
+    String? name,
+    double? value,
+    TransactionCategory? category,
+    TransactionType? type,
+    PaymentMethod? paymentMethod,
+    DateTime? date,
+    DateTime? endDate,
+    bool? isPaid,
+  }) {
+    return Transaction(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      value: value ?? this.value,
+      category: category ?? this.category,
+      type: type ?? this.type,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
+      date: date ?? this.date,
+      endDate: endDate ?? this.endDate,
+      isPaid: isPaid ?? this.isPaid,
+    );
+  }
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
       'name': name,
       'value': value,
-      'category': category,
-      'date': date,
-      'endDate': endDate,
-      'isPaid': isPaid
+      'category_id': category?.id,
+      'subcategory_id':
+          category?.subcategories != null && category!.subcategories!.isNotEmpty
+              ? category!.subcategories![0].id
+              : null,
+      'date': date.toIso8601String(),
+      'end_date': endDate != null ? endDate!.toIso8601String() : "",
+      'paid': _getIsPaidToDatabase()
     };
   }
 
   static Transaction fromMap(Map<String, dynamic> map) {
     return Transaction(
       id: map['id'],
-      isPaid: map['is_paid'],
+      isPaid: map['is_paid'] != null
+          ? map['is_paid'] == 1
+              ? true
+              : false
+          : null,
       name: map['name'],
       value: map['value'],
-      category: map['category'],
+      category: map['category'] ?? TransactionCategory.fromMap(map['category']),
       type: TransactionTypeExtension.fromString(map['type']),
       paymentMethod: PaymentMethodExtension.fromString(map['payment_method']),
       date: DateTime.parse(map['date']),
-      endDate: map['end_date'] != null ? DateTime.parse(map['end_date']) : null,
+      endDate: map['end_date'] ?? DateTime.parse(map['end_date']),
     );
   }
 }

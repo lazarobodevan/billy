@@ -1,4 +1,6 @@
 import 'package:billy/models/category/transaction_category.dart';
+import 'package:billy/models/transaction/transaction_model.dart';
+import 'package:billy/presentation/screens/add_transaction/bloc/add_transaction_bloc.dart';
 import 'package:billy/presentation/shared/components/category_editor_dialog.dart';
 import 'package:billy/presentation/theme/colors.dart';
 import 'package:billy/presentation/theme/typography.dart';
@@ -11,9 +13,12 @@ import '../../../models/subcategory/subcategory.dart';
 import '../../screens/nav_pages/categories/category_bloc/category_bloc.dart';
 
 class CategoryTile extends StatefulWidget {
+  final bool? isClickable;
+  final Function onClick;
   final TransactionCategory category;
 
-  const CategoryTile({super.key, required this.category});
+  const CategoryTile(
+      {super.key, required this.category, this.isClickable = true, required this.onClick});
 
   @override
   State<CategoryTile> createState() => _CategoryTileState();
@@ -29,14 +34,20 @@ class _CategoryTileState extends State<CategoryTile> {
   }
 
   double getWidgetHeigth() {
-    var bloc = BlocProvider.of<CategoryBloc>(context);
-    var subcategories = bloc.category.subcategories;
-    const retractedHeigth = 80;
-    var numberOfItems = subcategories?.length.toDouble() ?? 0;
+    var subcategories = widget.category.subcategories;
+    const retractedHeigth = 80.0;
+    double numberOfItems = subcategories?.length.toDouble() ?? 0;
     const heigthSpaceBetween = 10;
+    double itemHeight = retractedHeigth + heigthSpaceBetween;
 
     if (_isExpanded) {
-      return retractedHeigth + (retractedHeigth * numberOfItems) + (numberOfItems * heigthSpaceBetween)  + 160;
+      if (numberOfItems == 0) {
+        return retractedHeigth * 2;
+      } else if (numberOfItems == 1) {
+        return itemHeight * 3 - heigthSpaceBetween;
+      } else {
+        return itemHeight * numberOfItems + retractedHeigth;
+      }
     }
     return 80;
   }
@@ -44,6 +55,15 @@ class _CategoryTileState extends State<CategoryTile> {
   void onDelete(CategoryBloc bloc) {
     if (widget.category.id == null) return;
     bloc.add(DeleteCategoryEvent(id: widget.category.id!));
+  }
+
+  void onSelectCategory({Subcategory? subcategory}) {
+    final categoryCopy = widget.category.copyWith(
+      subcategories: subcategory != null ? [subcategory] : [],
+    );
+    BlocProvider.of<AddTransactionBloc>(context)
+        .add(ChangeCategoryEvent(category: categoryCopy));
+    widget.onClick();
   }
 
   @override
@@ -116,58 +136,66 @@ class _CategoryTileState extends State<CategoryTile> {
                       )
                     ],
                   ),
-                  child: Container(
-                    color: ThemeColors.primary3,
-                    height: 79,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 45,
-                                height: 45,
-                                decoration: BoxDecoration(
-                                    color: ThemeColors.primary1,
-                                    borderRadius: BorderRadius.circular(50),
-                                    border: Border.all(
-                                        color: widget.category.color,
-                                        width: 4)),
-                                child: Center(
+                  child: Material(
+                    child: InkWell(
+                      onTap: () {
+                        if (widget.isClickable == false) return;
+                        onSelectCategory();
+                      },
+                      child: Ink(
+                        color: ThemeColors.primary3,
+                        height: 79,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(10),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 45,
+                                    height: 45,
+                                    decoration: BoxDecoration(
+                                        color: ThemeColors.primary1,
+                                        borderRadius: BorderRadius.circular(50),
+                                        border: Border.all(
+                                            color: widget.category.color,
+                                            width: 4)),
+                                    child: Center(
+                                      child: Icon(
+                                        widget.category.icon,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  Text(
+                                    widget.category.name,
+                                    style: TypographyStyles.label3(),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Material(
+                              child: InkWell(
+                                onTap: toggleExpansion,
+                                child: Ink(
+                                  width: 30,
+                                  height: double.maxFinite,
+                                  color: Colors.white,
                                   child: Icon(
-                                    widget.category.icon,
-                                    color: Colors.white,
+                                    _isExpanded
+                                        ? Icons.arrow_drop_up_rounded
+                                        : Icons.arrow_drop_down_rounded,
                                   ),
                                 ),
                               ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                widget.category.name,
-                                style: TypographyStyles.label3(),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Material(
-                          child: InkWell(
-                            onTap: toggleExpansion,
-                            child: Ink(
-                              width: 30,
-                              height: double.maxFinite,
-                              color: Colors.white,
-                              child: Icon(
-                                _isExpanded
-                                    ? Icons.arrow_drop_up_rounded
-                                    : Icons.arrow_drop_down_rounded,
-                              ),
                             ),
-                          ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
@@ -178,10 +206,16 @@ class _CategoryTileState extends State<CategoryTile> {
                           padding: const EdgeInsets.only(left: 45),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  ...bloc.categories.expand((category) {
-                                    return category.subcategories?.map((subcat) {
-                                      return Padding(
+                            children: [
+                              if (widget.category.subcategories != null)
+                                ...widget.category.subcategories!.map((subcat) {
+                                  return Material(
+                                    child: InkWell(
+                                      onTap: (){
+                                        if(widget.isClickable == false) return;
+                                        onSelectCategory(subcategory: subcat);
+                                      },
+                                      child: Ink(
                                         padding: const EdgeInsets.only(bottom: 10),
                                         child: Row(
                                           children: [
@@ -190,7 +224,8 @@ class _CategoryTileState extends State<CategoryTile> {
                                               height: 45,
                                               decoration: BoxDecoration(
                                                 color: ThemeColors.secondary1,
-                                                borderRadius: BorderRadius.circular(50),
+                                                borderRadius:
+                                                    BorderRadius.circular(50),
                                               ),
                                               child: Center(
                                                 child: Icon(
@@ -206,13 +241,17 @@ class _CategoryTileState extends State<CategoryTile> {
                                             ),
                                           ],
                                         ),
-                                      );
-                                    }).toList() ?? [];
-                                  }).toList(),
-                                  const SizedBox(height: 10,),
-                                  _buildAddSubcategoryButton(context, widget.category.id!)
-                                ],
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              const SizedBox(
+                                height: 10,
                               ),
+                              _buildAddSubcategoryButton(
+                                  context, widget.category.id!)
+                            ],
+                          ),
                         )
                       : const SizedBox.shrink(),
                 ),

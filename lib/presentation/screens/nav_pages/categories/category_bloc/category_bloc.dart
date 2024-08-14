@@ -92,6 +92,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     });
 
     on<UpdateCategoryWithSubcategoryEvent>((event, emit){
+      emit(LoadingCategoriesState());
       categories[categories.indexWhere((cat)=>cat.id == event.subcategory.parentId)].subcategories!.add(event.subcategory);
       emit(LoadedCategoriesState(categories: categories));
     });

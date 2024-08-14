@@ -27,6 +27,22 @@ class TransactionCategory {
       this.color = const Color(0xFFFFFFFF),
       this.icon = Icons.question_mark});
 
+  TransactionCategory copyWith({
+    int? id,
+    String? name,
+    Color? color,
+    IconData? icon,
+    List<Subcategory>? subcategories,
+  }) {
+    return TransactionCategory(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      color: color ?? this.color,
+      icon: icon ?? this.icon,
+      subcategories: subcategories ?? this.subcategories,
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -38,10 +54,10 @@ class TransactionCategory {
 
   static TransactionCategory fromMap(Map<String, dynamic> map) {
     return TransactionCategory(
-      id: map['id'],
-      name: map['name'],
-      color: ColorConverter.intToColor(map['color']),
-      icon: IconConverter.parseIconFromDb(jsonDecode(map['icon'])),
+      id: map['category_id'] ?? map['id'],
+      name: map['category_name']?? map['name'],
+      color: ColorConverter.intToColor(map['category_color'] ?? map['color']),
+      icon: IconConverter.parseIconFromDb(jsonDecode(map['category_icon'] ?? map['icon'])),
       subcategories: [],
     );
   }

@@ -45,3 +45,55 @@ class ChangePaymentMethod extends AddTransactionEvent{
   List<Object?> get props => [paymentMethod];
 
 }
+
+class ChangeCategoryEvent extends AddTransactionEvent{
+  final TransactionCategory category;
+
+  const ChangeCategoryEvent({required this.category});
+
+  @override
+  List<Object?> get props => [category];
+}
+
+class ChangeTransactionNameEvent extends AddTransactionEvent{
+  final String name;
+
+  const ChangeTransactionNameEvent({required this.name});
+
+  @override
+  List<Object?> get props => [];
+}
+
+class ChangeTransactionDateEvent extends AddTransactionEvent{
+  final DateTime date;
+
+  const ChangeTransactionDateEvent({required this.date});
+
+  @override
+  List<Object?> get props => [];
+}
+
+class ChangeTransactionEndDateEvent extends AddTransactionEvent{
+  final DateTime? date;
+
+  const ChangeTransactionEndDateEvent({required this.date});
+
+  @override
+  List<Object?> get props => [];
+}
+
+class ChangeTransactionIsPaidEvent extends AddTransactionEvent{
+  final bool isPaid;
+
+  const ChangeTransactionIsPaidEvent({required this.isPaid});
+
+  @override
+  List<Object?> get props => [];
+}
+
+class SaveTransactionToDatabaseEvent extends AddTransactionEvent{
+
+  @override
+  List<Object?> get props => [];
+
+}

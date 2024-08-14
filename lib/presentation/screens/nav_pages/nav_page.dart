@@ -12,7 +12,7 @@ class NavigationPage extends StatefulWidget {
 }
 
 class _NavigationPageState extends State<NavigationPage> {
-  List pages = [Home(), Insights(), Categories(), Home()];
+  List pages = [Home(), Insights(), Categories(isSelectableCategories: false,), Home()];
   List barItems = [
     {"text": "Home", "icon": Icons.home_outlined},
     {"text": "Insights", "icon": Icons.pie_chart_outline},

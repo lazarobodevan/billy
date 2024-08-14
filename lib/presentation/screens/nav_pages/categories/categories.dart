@@ -9,7 +9,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'category_bloc/category_bloc.dart';
 
 class Categories extends StatelessWidget {
-  const Categories({super.key});
+  final bool? isSelectableCategories;
+  const Categories({super.key, this.isSelectableCategories = false});
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +80,7 @@ class Categories extends StatelessWidget {
           return ListView.separated(
             padding: EdgeInsets.symmetric(horizontal: 16),
             itemBuilder: (context, index) {
-              return CategoryTile(category: bloc.categories[index],);
+              return CategoryTile(category: bloc.categories[index],isClickable: isSelectableCategories,onClick: (){Navigator.of(context).pop();},);
             },
             separatorBuilder: (context, index) {
               return const SizedBox(

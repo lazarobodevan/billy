@@ -32,11 +32,13 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         category_id INTEGER,
+        subcategory_id INTEGER,
         value REAL NOT NULL,
-        paid BOOLEAN NOT NULL DEFAULT 0,
+        paid INTEGER,
         date TEXT NOT NULL,
         end_date TEXT,
-        FOREIGN KEY (category_id) REFERENCES categories(id)
+        FOREIGN KEY (category_id) REFERENCES categories(id),
+        FOREIGN KEY (subcategory_id) REFERENCES subcategories(id)
       );
     ''');
 
@@ -59,6 +61,14 @@ class DatabaseHelper {
         max REAL,
         category_id INTEGER,
         FOREIGN KEY (category_id) REFERENCES categories(id)
+      );
+    ''');
+
+    db.execute('''
+      CREATE TABLE balance (
+        credit_limit REAL DEFAULT 0,
+        credit_limit_used REAL DEFAULT 0,
+        balance REAL DEFAULT 0
       );
     ''');
   }

@@ -33,7 +33,6 @@ class CategoryIconChangedState extends CategoryState{
   const CategoryIconChangedState({required this.icon});
   @override
   List<Object?> get props => [icon];
-
 }
 
 class SavingCategoryToDatabase extends CategoryState{

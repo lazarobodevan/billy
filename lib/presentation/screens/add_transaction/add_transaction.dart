@@ -1,8 +1,11 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:billy/enums/transaction/transaction_type.dart';
 import 'package:billy/presentation/screens/add_transaction/bloc/add_transaction_bloc.dart';
 import 'package:billy/presentation/screens/add_transaction/components/digit_button.dart';
 import 'package:billy/presentation/screens/add_transaction/components/payment_method_selector.dart';
 import 'package:billy/presentation/screens/add_transaction/components/toggle_transaction_type.dart';
+import 'package:billy/presentation/screens/add_transaction/components/transaction_details_form.dart';
+import 'package:billy/presentation/shared/components/date_picker.dart';
 import 'package:billy/presentation/theme/colors.dart';
 import 'package:billy/presentation/theme/typography.dart';
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
@@ -17,6 +20,12 @@ class AddTransaction extends StatefulWidget {
 
 class _AddTransactionState extends State<AddTransaction> {
   String valueText = "";
+
+  @override
+  void initState() {
+    BlocProvider.of<AddTransactionBloc>(context).add(ResetValue());
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -57,7 +66,9 @@ class _AddTransactionState extends State<AddTransaction> {
         foregroundColor: Colors.white,
         actions: [
           InkWell(
-            onTap: () {_showTransactionNameDialog(context);},
+            onTap: () {
+              _showTransactionDetailsDialog(context);
+            },
             child: Ink(
               padding: EdgeInsets.all(16),
               child: Icon(Icons.check),
@@ -71,8 +82,7 @@ class _AddTransactionState extends State<AddTransaction> {
           children: [
             Center(child: ToggleTransactionType()),
             BlocBuilder<AddTransactionBloc, AddTransactionState>(
-              bloc: BlocProvider.of<AddTransactionBloc>(context)
-                ..add(ResetValue()),
+              bloc: BlocProvider.of<AddTransactionBloc>(context),
               builder: (context, state) {
                 return Container(
                   width: screenSize.width,
@@ -149,31 +159,12 @@ class _AddTransactionState extends State<AddTransaction> {
     );
   }
 
-  void _showTransactionNameDialog(BuildContext context){
-    TextEditingController _controller = TextEditingController();
-    FocusNode _focusNode = FocusNode();
-    showDialog(context: context, builder: (BuildContext context){
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _focusNode.requestFocus();
-      });
-      return AlertDialog(
-        title: Text("Nome da transação", style: TypographyStyles.label1(),),
-        content: TextField(
-          controller: _controller,
-          focusNode: _focusNode,
-          onChanged: (str){},
-          maxLength: 30,
-          maxLengthEnforcement: MaxLengthEnforcement.truncateAfterCompositionEnds,
-          style: TypographyStyles.paragraph2(),
-          autocorrect: false,
-        ),
-        actionsAlignment: MainAxisAlignment.spaceBetween,
-        backgroundColor: ThemeColors.primary2,
-        actions: [
-          TextButton(onPressed: (){Navigator.of(context).pop();}, child: Text("Cancelar")),
-          TextButton(onPressed: (){}, child: Text("Confirmar")),
-        ],
-      );
-    });
+  void _showTransactionDetailsDialog(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context){
+          return const TransactionDetailsForm();
+        }
+    );
   }
 }

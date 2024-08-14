@@ -14,6 +14,18 @@ class PaymentMethodSelector extends StatelessWidget {
     bloc.add(ChangePaymentMethod(paymentMethod: paymentMethod));
   }
 
+  onGetSelectedCategory(AddTransactionBloc bloc) {
+    final category = bloc.transaction.category;
+    if (category != null && category.id != null) {
+      if (category.subcategories != null &&
+          category.subcategories!.isNotEmpty) {
+        return category.subcategories![0];
+      }
+      return category;
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AddTransactionBloc, AddTransactionState>(
@@ -76,7 +88,7 @@ class PaymentMethodSelector extends StatelessWidget {
                           },
                           value: PaymentMethod.CREDIT_CARD,
                           child:
-                          MoneyType("Cartão", Icons.credit_card_rounded)),
+                              MoneyType("Cartão", Icons.credit_card_rounded)),
                     ],
                   ),
                 ),
@@ -87,7 +99,8 @@ class PaymentMethodSelector extends StatelessWidget {
               Expanded(
                 child: InkWell(
                   onTap: () {
-                    Navigator.of(context).pushNamed("/categories");
+                    Navigator.of(context).pushNamed("/categories",
+                        arguments: true);
                   },
                   child: Ink(
                     height: 60,
@@ -100,14 +113,18 @@ class PaymentMethodSelector extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Icon(
-                              Icons.money_rounded,
+                              onGetSelectedCategory(bloc) != null
+                                  ? onGetSelectedCategory(bloc).icon
+                                  : Icons.money_rounded,
                               color: ThemeColors.primary3,
                             ),
                             const SizedBox(
                               width: 5,
                             ),
                             Text(
-                              "Categoria",
+                              onGetSelectedCategory(bloc) != null
+                                  ? onGetSelectedCategory(bloc).name
+                                  : "Categoria",
                               style: TypographyStyles.label3()
                                   .copyWith(color: ThemeColors.primary3),
                             )
