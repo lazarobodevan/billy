@@ -10,4 +10,10 @@ extension PaymentMethodExtension on PaymentMethod{
       orElse: ()=> throw ArgumentError('Invalid payment method: $paymentMethodStr'),
     );
   }
+
+  static int toDatabase(PaymentMethod paymentMethod){
+    if(paymentMethod == PaymentMethod.PIX) return 1;
+    if(paymentMethod == PaymentMethod.CREDIT_CARD) return 2;
+    return 3;
+  }
 }

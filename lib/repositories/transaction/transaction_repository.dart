@@ -11,9 +11,9 @@ class TransactionRepository implements ITransactionRepository{
     final db = await _databaseHelper.database;
     final transactionMap = transaction.toMap();
     final id = await db.insert('transactions', transactionMap);
-    final createdTransaction = await db.query('transactions', where: 'id = ?', whereArgs: [id], limit: 1);
+    //final createdTransaction = await db.query('transactions', where: 'id = ?', whereArgs: [id], limit: 1);
 
-    return Transaction.fromMap(createdTransaction[0]);
+    return transaction.copyWith(id: id);
 
   }
 
@@ -43,22 +43,26 @@ class TransactionRepository implements ITransactionRepository{
       transactions.name,
       transactions.value,
       transactions.category_id,
-      transactions.type,
-      transactions.payment_method,
+      transactions.type_id,
+      transactions.payment_method_id,
       transactions.date,
       transactions.end_date,
-      transactions.is_paid,
+      transactions.paid,      
       categories.name AS category_name,
       categories.icon AS category_icon,
-      categories.color AS category_color
+      categories.color AS category_color,
+      transaction_types.name AS type,
+      payment_methods.name AS payment_method
     FROM transactions
     LEFT JOIN categories ON transactions.category_id = categories.id
+    LEFT JOIN transaction_types ON transactions.type_id = transaction_types.id
+    LEFT JOIN payment_methods ON transactions.payment_method_id = payment_methods.id
+    ORDER BY transactions.date DESC
     LIMIT ? OFFSET ?
   ''', [limit, offset]);
 
     return transactions.map((map) {
-      final category = TransactionCategory.fromMap(map);
-      return Transaction.fromMap(map)..category = category;
+      return Transaction.fromMap(map);
     }).toList();
   }
 

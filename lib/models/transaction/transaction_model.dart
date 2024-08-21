@@ -80,8 +80,10 @@ class Transaction {
           category?.subcategories != null && category!.subcategories!.isNotEmpty
               ? category!.subcategories![0].id
               : null,
+      'type_id': TransactionTypeExtension.toDatabase(type),
+      'payment_method_id': PaymentMethodExtension.toDatabase(paymentMethod),
       'date': date.toIso8601String(),
-      'end_date': endDate != null ? endDate!.toIso8601String() : "",
+      'end_date': endDate?.toIso8601String(),
       'paid': _getIsPaidToDatabase()
     };
   }
@@ -96,11 +98,11 @@ class Transaction {
           : null,
       name: map['name'],
       value: map['value'],
-      category: map['category'] ?? TransactionCategory.fromMap(map['category']),
+      category: map['category_id'] != null ? TransactionCategory.fromMap(map) : null,
       type: TransactionTypeExtension.fromString(map['type']),
       paymentMethod: PaymentMethodExtension.fromString(map['payment_method']),
       date: DateTime.parse(map['date']),
-      endDate: map['end_date'] ?? DateTime.parse(map['end_date']),
+      endDate: map['end_date'] != null ? DateTime.parse(map['end_date']) : null,
     );
   }
 }

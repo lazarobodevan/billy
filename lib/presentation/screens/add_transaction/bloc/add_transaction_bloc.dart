@@ -5,7 +5,9 @@ import 'package:billy/enums/transaction/transaction_type.dart';
 import 'package:billy/models/category/transaction_category.dart';
 import 'package:billy/models/subcategory/subcategory.dart';
 import 'package:billy/models/transaction/transaction_model.dart';
+import 'package:billy/repositories/balance/i_balance_repository.dart';
 import 'package:billy/repositories/transaction/i_transaction_repository.dart';
+import 'package:billy/use_cases/balance/set_balance_use_case.dart';
 import 'package:billy/use_cases/transaction/create_transaction_use_case.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -18,16 +20,24 @@ class AddTransactionBloc
     extends Bloc<AddTransactionEvent, AddTransactionState> {
 
   late final CreateTransactionUseCase _createTransactionUseCase;
+  late final SetBalanceUseCase _setBalanceUseCase;
 
   final ITransactionRepository transactionRepository;
+  final IBalanceRepository balanceRepository;
 
   late int amountInCents;
   late Transaction transaction;
 
-  AddTransactionBloc({required this.transactionRepository})
+  AddTransactionBloc(
+      {required this.transactionRepository, required this.balanceRepository})
       : super(AddTransactionInitial()) {
 
-    _createTransactionUseCase = CreateTransactionUseCase(transactionRepository: transactionRepository);
+    _setBalanceUseCase = SetBalanceUseCase(repository: balanceRepository);
+
+    _createTransactionUseCase = CreateTransactionUseCase(
+        transactionRepository: transactionRepository,
+        setBalanceUseCase: _setBalanceUseCase);
+
     amountInCents = 0;
     transaction = Transaction.empty();
 
@@ -53,49 +63,49 @@ class AddTransactionBloc
       }
     });
 
-    on<ChangeTransactionType>((event, emit){
+    on<ChangeTransactionType>((event, emit) {
       transaction = transaction.copyWith(type: event.transactionType);
 
-      if(transaction.type == TransactionType.INCOME){
+      if (transaction.type == TransactionType.INCOME) {
         transaction = transaction.copyWith(isPaid: null, endDate: null);
       }
 
       emit(TransactionTypeChangedState(transactionType: transaction.type));
     });
 
-    on<ChangePaymentMethod>((event, emit){
+    on<ChangePaymentMethod>((event, emit) {
       transaction.paymentMethod = event.paymentMethod;
       emit(PaymentMethodChangedState(paymentMethod: transaction.paymentMethod));
     });
 
-    on<ChangeCategoryEvent>((event, emit){
+    on<ChangeCategoryEvent>((event, emit) {
       transaction = transaction.copyWith(category: event.category);
       emit(TransactionCategoryChangedState(category: event.category));
     });
 
-    on<ChangeTransactionDateEvent>((event, emit){
+    on<ChangeTransactionDateEvent>((event, emit) {
       transaction = transaction.copyWith(date: event.date);
       //TODO: Add emit state
     });
 
-    on<ChangeTransactionEndDateEvent>((event, emit){
+    on<ChangeTransactionEndDateEvent>((event, emit) {
       transaction = transaction.copyWith(endDate: event.date);
       //TODO: Add emit state
     });
 
-    on<ChangeTransactionIsPaidEvent>((event, emit){
+    on<ChangeTransactionIsPaidEvent>((event, emit) {
       transaction = transaction.copyWith(isPaid: event.isPaid);
       //TODO: Add emit state
     });
 
-    on<ChangeTransactionNameEvent>((event, emit){
+    on<ChangeTransactionNameEvent>((event, emit) {
       transaction = transaction.copyWith(name: event.name);
       emit(TransactionNameChangedState(name: event.name));
     });
 
-
-    on<SaveTransactionToDatabaseEvent>((event, emit)async{
-      final createdTransaction = await _createTransactionUseCase.execute(transaction);
+    on<SaveTransactionToDatabaseEvent>((event, emit) async {
+      final createdTransaction =
+          await _createTransactionUseCase.execute(transaction);
       emit(SavedTransactionToDatabaseState(transaction: createdTransaction));
     });
   }

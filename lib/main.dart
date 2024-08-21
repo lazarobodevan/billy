@@ -4,17 +4,20 @@ import 'package:billy/presentation/screens/nav_pages/categories/categories.dart'
 import 'package:billy/presentation/screens/nav_pages/categories/category_bloc/category_bloc.dart';
 import 'package:billy/presentation/screens/nav_pages/categories/subcategory_bloc/subcategory_bloc.dart';
 import 'package:billy/presentation/screens/nav_pages/nav_page.dart';
+import 'package:billy/repositories/balance/balance_repository.dart';
 import 'package:billy/repositories/category/category_repository.dart';
 import 'package:billy/repositories/database_helper.dart';
 import 'package:billy/repositories/subcategory/subcategory_repository.dart';
 import 'package:billy/repositories/transaction/transaction_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await DatabaseHelper.instance.database;
+  await initializeDateFormatting('pt_BR', null);
 
   runApp(const MyApp());
 }
@@ -30,10 +33,12 @@ class MyApp extends StatelessWidget {
         RepositoryProvider(create: (context) => TransactionRepository()),
         RepositoryProvider(create: (context) => CategoryRepository()),
         RepositoryProvider(create: (context) => SubcategoryRepository()),
+        RepositoryProvider(create: (context)=> BalanceRepository()),
         BlocProvider(
           create: (context) => AddTransactionBloc(
             transactionRepository:
                 RepositoryProvider.of<TransactionRepository>(context),
+            balanceRepository: RepositoryProvider.of<BalanceRepository>(context)
           ),
         ),
         BlocProvider(
