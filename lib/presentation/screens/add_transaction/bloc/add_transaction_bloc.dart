@@ -104,6 +104,7 @@ class AddTransactionBloc
     });
 
     on<SaveTransactionToDatabaseEvent>((event, emit) async {
+      emit(SavingTransactionToDatabaseState());
       final createdTransaction =
           await _createTransactionUseCase.execute(transaction);
       emit(SavedTransactionToDatabaseState(transaction: createdTransaction));

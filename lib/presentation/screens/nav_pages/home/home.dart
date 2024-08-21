@@ -1,5 +1,6 @@
-import 'package:billy/presentation/screens/add_transaction/add_transaction.dart';
-import 'package:billy/presentation/screens/add_transaction/add_transaction.dart';
+import 'dart:ui';
+
+import 'package:billy/presentation/screens/nav_pages/home/widgets/draggable_transactions_container.dart';
 import 'package:billy/presentation/shared/components/action_button.dart';
 import 'package:billy/presentation/shared/components/transaction_item.dart';
 import 'package:billy/presentation/theme/colors.dart';
@@ -20,6 +21,9 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  bool isContainerHidden = false;
+  double _currentChildSize = 1.0;
+
   @override
   void initState() {
     super.initState();
@@ -27,236 +31,240 @@ class _HomeState extends State<Home> {
     homeBloc.add(LoadHomeEvent());
   }
 
+  void toggleContainerVisibility() {
+    setState(() {
+      isContainerHidden = !isContainerHidden;
+      if (!isContainerHidden) {
+        _currentChildSize = 1.0;
+      }
+    });
+  }
+
+  void updateChildSize(double size) {
+    setState(() {
+      _currentChildSize = size;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ThemeColors.primary2,
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
+            AnimatedPositioned(
+              duration: Duration(milliseconds: 500),
+              curve: Curves.decelerate,
+              top: isContainerHidden
+                  ? MediaQuery.of(context).size.height / 5
+                  : 0,
+              left: 0,
+              right: 0,
               child: BlocBuilder<HomeBloc, HomeState>(
                 builder: (context, state) {
                   if (state is LoadingHomeState) {
                     return const Center(child: CircularProgressIndicator());
                   }
                   if (state is LoadedHomeState) {
-                    return _buildBalanceSection(state);
+                    return _buildBalanceSection(state, isContainerHidden);
                   }
                   return SizedBox();
                 },
               ),
             ),
-            const SizedBox(height: 30),
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: const BoxDecoration(
-                  color: ThemeColors.primary3,
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(50),
-                    topLeft: Radius.circular(50),
+            if (!isContainerHidden)
+              AnimatedPositioned(
+                duration: Duration(milliseconds: 500),
+                bottom:
+                    isContainerHidden ? -MediaQuery.of(context).size.height : 0,
+                left: 0,
+                right: 0,
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height / 2,
+                  child: DraggableTransactionsContainer(
+                    onHide: toggleContainerVisibility,
+                    onSizeChanged: updateChildSize,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black12,
-                      offset: Offset(0, -2),
-                      blurRadius: 10,
-                    ),
-                  ],
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 50,
-                      height: 10,
+              )
+            else
+              Positioned(
+                  bottom: 40,
+                  left: MediaQuery.of(context).size.width / 2 - 30,
+                  child: InkWell(
+                    onTap: () {
+                      toggleContainerVisibility();
+                    },
+                    child: Ink(
+                      width: 60,
+                      height: 60,
                       decoration: BoxDecoration(
-                        color: Colors.grey,
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Operações", style: TypographyStyles.label2()),
-                        Text(
-                          "Ver todas",
-                          style: TypographyStyles.label2()
-                              .copyWith(color: ThemeColors.secondary1),
+                          border: Border.all(color: ThemeColors.primary1),
+                          borderRadius: BorderRadius.circular(60)),
+                      child: const Center(
+                        child: Icon(
+                          Icons.keyboard_arrow_up_rounded,
+                          size: 40,
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Expanded(
-                      child: BlocBuilder<HomeBloc, HomeState>(
-                        builder: (context, state) {
-                          if (state is LoadingHomeState) {
-                            return const Center(
-                              child: CircularProgressIndicator(
-                                color: ThemeColors.primary1,
-                              ),
-                            );
-                          }
-                          if (state is LoadedHomeState) {
-                            if (state.transactions.isEmpty) {
-                              return Center(
-                                child: Text(
-                                  "Sem transações",
-                                  style: TypographyStyles.paragraph3(),
-                                ),
-                              );
-                            }
-                            return ListView.builder(
-                              itemCount: state.transactions.length,
-                              itemBuilder: (context, index) {
-                                return TransactionItem(
-                                  transaction: state.transactions[index],
-                                );
-                              },
-                            );
-                          }
-                          return SizedBox();
-                        },
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
+                  ))
           ],
         ),
       ),
     );
   }
 
-  Widget _buildBalanceSection(LoadedHomeState state) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
+  Widget _buildBalanceSection(LoadedHomeState state, bool isContainerHidden) {
+    return BlocListener<AddTransactionBloc, AddTransactionState>(
+      listener: (context, state) {
+        if (state is SavedTransactionToDatabaseState) {
+          BlocProvider.of<HomeBloc>(context).add(LoadHomeEvent());
+        }
+      },
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 500),
+        curve: Curves.ease,
+        decoration: BoxDecoration(
+            gradient: isContainerHidden
+                ? LinearGradient(
+                    colors: [Colors.yellow.shade200, Colors.yellow.shade50],
+                    end: Alignment.bottomRight,
+                    begin: Alignment.topLeft)
+                : null,
+            borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Material(
+            color: Colors.transparent,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(50),
-                    color: ThemeColors.primary1,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(50),
+                            color: ThemeColors.primary1,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          "Lázaro Bodevan",
+                          style: TypographyStyles.label3(),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      width: 30,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color: ThemeColors.primary3,
+                        borderRadius: BorderRadius.circular(50),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            offset: Offset(0, 4),
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                      child: const Icon(Icons.notifications_none),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(height: 17),
                 Text(
-                  "Lázaro Bodevan",
-                  style: TypographyStyles.label3(),
+                  "Disponível na conta",
+                  style: TypographyStyles.paragraph3(),
+                ),
+                Text(
+                  CurrencyFormatter.format(state.balance.balance),
+                  style: TypographyStyles.headline3(),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Limite no cartão",
+                      style: TypographyStyles.label2(),
+                    ),
+                    Text(
+                      CurrencyFormatter.format(state.balance.creditLimit),
+                      style: TypographyStyles.paragraph3(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 7),
+                Stack(
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: 1,
+                      color: Colors.black12,
+                    ),
+                    Container(
+                      width: getCreditLimitWidth(
+                        limit: state.balance.creditLimit,
+                        limitUsed: state.balance.limitUsed,
+                      ),
+                      height: 2,
+                      color: ThemeColors.primary1,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  "Fatura: ${CurrencyFormatter.format(state.balance.limitUsed)}",
+                ),
+                const SizedBox(height: 22),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: ActionButton(
+                        text: "Pagar",
+                        icon: Icons.payments_sharp,
+                        onTap: () {
+                          Navigator.of(context).pushNamed("/transaction");
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 40),
+                    Flexible(
+                      child: ActionButton(
+                        text: "Receber",
+                        icon: Icons.add_circle,
+                        onTap: () {
+                          Navigator.of(context).pushNamed("/transaction");
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-            Container(
-              width: 30,
-              height: 30,
-              decoration: BoxDecoration(
-                color: ThemeColors.primary3,
-                borderRadius: BorderRadius.circular(50),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    offset: Offset(0, 4),
-                    blurRadius: 4,
-                  ),
-                ],
-              ),
-              child: const Icon(Icons.notifications_none),
-            ),
-          ],
+          ),
         ),
-        const SizedBox(height: 17),
-        Text(
-          "Disponível na conta",
-          style: TypographyStyles.paragraph3(),
-        ),
-        Text(
-          CurrencyFormatter.format(state.balance.balance),
-          style: TypographyStyles.headline3(),
-        ),
-        const SizedBox(height: 20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              "Limite no cartão",
-              style: TypographyStyles.label2(),
-            ),
-            Text(
-              CurrencyFormatter.format(state.balance.creditLimit),
-              style: TypographyStyles.paragraph3(),
-            ),
-          ],
-        ),
-        const SizedBox(height: 7),
-        Stack(
-          children: [
-            Container(
-              width: MediaQuery.of(context).size.width,
-              height: 1,
-              color: Colors.black12,
-            ),
-            Container(
-              width: getCreditLimitWidth(
-                limit: state.balance.creditLimit,
-                limitUsed: state.balance.limitUsed,
-              ),
-              height: 2,
-              color: ThemeColors.primary1,
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Text(
-          "Fatura: ${CurrencyFormatter.format(state.balance.limitUsed)}",
-        ),
-        const SizedBox(height: 22),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Flexible(
-              child: ActionButton(
-                text: "Pagar",
-                icon: Icons.payments_sharp,
-                onTap: () {
-                  Navigator.of(context).pushNamed("/transaction");
-                },
-              ),
-            ),
-            const SizedBox(width: 40),
-            Flexible(
-              child: ActionButton(
-                text: "Receber",
-                icon: Icons.add_circle,
-                onTap: () {
-                  Navigator.of(context).pushNamed("/transaction");
-                },
-              ),
-            ),
-          ],
-        ),
-      ],
+      ),
     );
   }
 
-  double getCreditLimitWidth({required double limit, required double limitUsed}) {
+  double getCreditLimitWidth(
+      {required double limit, required double limitUsed}) {
     if (limit == 0) return 0;
 
     const padding = 2 * 16;
     final screenWidth = MediaQuery.of(context).size.width - padding;
     final percentage = (limitUsed * 100) / limit;
 
-    return screenWidth * (percentage/100);
+    return screenWidth * (percentage / 100);
   }
 }
-
