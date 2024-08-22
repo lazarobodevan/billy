@@ -16,7 +16,13 @@ class DatePicker extends StatefulWidget {
 
 class _DatePickerState extends State<DatePicker> {
   final formatter = new DateFormat('dd/MM/yyyy');
-  DateTime _dateTime = DateTime.now();
+  DateTime? _dateTime;
+
+  @override
+  void initState() {
+    _dateTime = widget.initialDate;
+    super.initState();
+  }
 
   void _showDatePicker() {
     showDatePicker(
@@ -25,11 +31,17 @@ class _DatePickerState extends State<DatePicker> {
       lastDate: DateTime.now().add(
         const Duration(days: 365),
       ),
-    ).then((value){
+    ).then((value) {
       setState(() {
         _dateTime = value!;
         widget.onSelect(_dateTime);
       });
+    });
+  }
+
+  void _resetDateTime(){
+    setState(() {
+      _dateTime = null;
     });
   }
 
@@ -38,8 +50,28 @@ class _DatePickerState extends State<DatePicker> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if(widget.label != null)
-          Text(widget.label!, style: TypographyStyles.label2(),),
+        if (widget.label != null)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                widget.label!,
+                style: TypographyStyles.label2(),
+              ),
+              InkWell(
+                onTap: _resetDateTime,
+                child: Ink(
+                  child: const Center(
+                    child: Icon(
+                      Icons.close,
+                      color: ThemeColors.semanticRed,
+                      size: 18,
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
         InkWell(
           onTap: () {
             _showDatePicker();
@@ -47,13 +79,15 @@ class _DatePickerState extends State<DatePicker> {
           child: Ink(
             height: 60,
             decoration: BoxDecoration(
-              border: Border.all(color: ThemeColors.primary1, width: 1),
-              borderRadius: BorderRadius.circular(16)
-            ),
+                border: Border.all(color: ThemeColors.primary1, width: 1),
+                borderRadius: BorderRadius.circular(16)),
             child: Center(
-              child: Text(widget.initialDate != null
-                  ? formatter.format(widget.initialDate!)
-                  : formatter.format(_dateTime), style: TypographyStyles.paragraph3(),),
+              child: Text(
+                _dateTime != null
+                    ? formatter.format(_dateTime!)
+                    : "Defina data",
+                style: TypographyStyles.paragraph3(),
+              ),
             ),
           ),
         ),

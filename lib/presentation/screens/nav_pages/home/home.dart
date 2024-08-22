@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:billy/presentation/screens/nav_pages/home/widgets/draggable_transactions_container.dart';
 import 'package:billy/presentation/shared/components/action_button.dart';
-import 'package:billy/presentation/shared/components/transaction_item.dart';
 import 'package:billy/presentation/theme/colors.dart';
 import 'package:billy/presentation/theme/typography.dart';
 import 'package:billy/repositories/transaction/transaction_repository.dart';

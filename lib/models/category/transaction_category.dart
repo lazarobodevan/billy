@@ -58,7 +58,7 @@ class TransactionCategory {
       name: map['category_name']?? map['name'],
       color: ColorConverter.intToColor(map['category_color'] ?? map['color']),
       icon: IconConverter.parseIconFromDb(jsonDecode(map['category_icon'] ?? map['icon'])),
-      subcategories: [],
+      subcategories: map['subcategory_id'] != null ? [Subcategory.fromMap(map)] : [],
     );
   }
 }

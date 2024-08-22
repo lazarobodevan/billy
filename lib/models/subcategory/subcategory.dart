@@ -40,7 +40,7 @@ class Subcategory {
         id: map['subcategory_id'] ?? map['id'],
         parentId: map['category_id'],
         name: map['subcategory_name'] ??  map['name'],
-        color: map['subcategory_color'] ?? ColorConverter.intToColor(map['color']),
-        icon: map['subcategory_icon'] ?? IconConverter.parseIconFromDb(jsonDecode(map['icon'])));
+        color: ColorConverter.intToColor(map['subcategory_color'] ?? map['color']),
+    icon: IconConverter.parseIconFromDb(jsonDecode(map['subcategory_icon'] ?? map['icon'])));
   }
 }

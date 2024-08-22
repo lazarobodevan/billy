@@ -69,7 +69,7 @@ class _TransactionDetailsFormState extends State<TransactionDetailsForm> {
               decoration: InputDecoration(hintText: "Nome da transação"),
               autocorrect: false,
             ),
-            DatePicker(label: "Data", onSelect: onSelectBeginDate),
+            DatePicker(label: "Data", onSelect: onSelectBeginDate, initialDate: beginDate,),
             const SizedBox(height: 10,),
             if(bloc.transaction.type == TransactionType.EXPENSE)
               DatePicker(label: "Data de Expiração", onSelect: onSelectEndDate),

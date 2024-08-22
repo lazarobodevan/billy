@@ -6,4 +6,5 @@ abstract class ITransactionRepository{
   Future<Transaction> update(Transaction transaction);
   Future<Transaction> delete(int id);
   Future<List<Transaction>> getAll();
+  Future<List<String>> getAvailablePeriods();
 }

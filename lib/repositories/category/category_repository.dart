@@ -84,6 +84,8 @@ class CategoryRepository implements ICategoryRepository {
   @override
   Future<void> delete(int id) async {
     final db = await _databaseHelper.database;
+    await db.update('transactions', {'category_id':null, 'subcategory_id':null}, where: 'category_id = ?', whereArgs: [id]);
+    await db.delete('subcategories', where: 'category_id = ?', whereArgs: [id]);
     await db.delete('categories', where: 'id = ?', whereArgs: [id]);
   }
 

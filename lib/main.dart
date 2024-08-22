@@ -1,9 +1,10 @@
 import 'package:billy/presentation/screens/add_transaction/add_transaction.dart';
 import 'package:billy/presentation/screens/add_transaction/bloc/add_transaction_bloc.dart';
-import 'package:billy/presentation/screens/nav_pages/categories/categories.dart';
-import 'package:billy/presentation/screens/nav_pages/categories/category_bloc/category_bloc.dart';
-import 'package:billy/presentation/screens/nav_pages/categories/subcategory_bloc/subcategory_bloc.dart';
+import 'package:billy/presentation/screens/categories/categories.dart';
+import 'package:billy/presentation/screens/categories/category_bloc/category_bloc.dart';
+import 'package:billy/presentation/screens/categories/subcategory_bloc/subcategory_bloc.dart';
 import 'package:billy/presentation/screens/nav_pages/nav_page.dart';
+import 'package:billy/presentation/screens/nav_pages/transactions/bloc/transactions_bloc.dart';
 import 'package:billy/repositories/balance/balance_repository.dart';
 import 'package:billy/repositories/category/category_repository.dart';
 import 'package:billy/repositories/database_helper.dart';
@@ -52,6 +53,7 @@ class MyApp extends StatelessWidget {
             repository: RepositoryProvider.of<SubcategoryRepository>(context),
           ),
         ),
+        BlocProvider(create: (context)=> TransactionsBloc(transactionRepository: RepositoryProvider.of<TransactionRepository>(context)))
       ],
       child: MaterialApp(
         title: 'Flutter Demo',

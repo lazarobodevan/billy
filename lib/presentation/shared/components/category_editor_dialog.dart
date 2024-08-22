@@ -4,8 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../models/category/transaction_category.dart';
-import '../../screens/nav_pages/categories/category_bloc/category_bloc.dart';
-import '../../screens/nav_pages/categories/subcategory_bloc/subcategory_bloc.dart';
+import '../../screens/categories/category_bloc/category_bloc.dart';
+import '../../screens/categories/subcategory_bloc/subcategory_bloc.dart';
 import 'color_picker_button.dart';
 import 'icon_picker_button.dart';
 import '../../theme/typography.dart';

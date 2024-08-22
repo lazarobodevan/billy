@@ -1,7 +1,9 @@
-import 'package:billy/presentation/screens/nav_pages/categories/categories.dart';
+import 'package:billy/presentation/screens/categories/categories.dart';
 import 'package:billy/presentation/screens/nav_pages/home/bloc/home_bloc.dart';
 import 'package:billy/presentation/screens/nav_pages/home/home.dart';
 import 'package:billy/presentation/screens/nav_pages/insights/insights.dart';
+import 'package:billy/presentation/screens/nav_pages/more/more.dart';
+import 'package:billy/presentation/screens/nav_pages/transactions/transactions.dart';
 import 'package:billy/presentation/theme/colors.dart';
 import 'package:billy/repositories/balance/balance_repository.dart';
 import 'package:billy/repositories/transaction/transaction_repository.dart';
@@ -19,10 +21,8 @@ class _NavigationPageState extends State<NavigationPage> {
   List pages = [
     _buildHome(),
     Insights(),
-    Categories(
-      isSelectableCategories: false,
-    ),
-    Home()
+    Transactions(),
+    More()
   ];
   List barItems = [
     {"text": "Home", "icon": Icons.home_outlined},
@@ -62,8 +62,8 @@ class _NavigationPageState extends State<NavigationPage> {
               label: 'Insights',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.category_outlined),
-              label: 'Categorias',
+              icon: Icon(Icons.attach_money_rounded),
+              label: 'Transações',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.more_vert_outlined),

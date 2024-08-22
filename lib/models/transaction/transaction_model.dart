@@ -91,8 +91,8 @@ class Transaction {
   static Transaction fromMap(Map<String, dynamic> map) {
     return Transaction(
       id: map['id'],
-      isPaid: map['is_paid'] != null
-          ? map['is_paid'] == 1
+      isPaid: map['paid'] != null
+          ? map['paid'] == 1
               ? true
               : false
           : null,
