@@ -1,3 +1,4 @@
+import 'package:billy/models/category/transaction_category.dart';
 import 'package:billy/presentation/shared/components/category_editor_dialog.dart';
 import 'package:billy/presentation/shared/components/category_tile.dart';
 import 'package:billy/presentation/theme/colors.dart';
@@ -6,11 +7,13 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../add_transaction/bloc/add_transaction_bloc.dart';
 import 'category_bloc/category_bloc.dart';
 
 class Categories extends StatelessWidget {
   final bool? isSelectableCategories;
-  const Categories({super.key, this.isSelectableCategories = false});
+  final Function(TransactionCategory category) onSelect;
+  const Categories({super.key, this.isSelectableCategories = false, required this.onSelect});
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +83,7 @@ class Categories extends StatelessWidget {
           return ListView.separated(
             padding: EdgeInsets.symmetric(horizontal: 16),
             itemBuilder: (context, index) {
-              return CategoryTile(category: bloc.categories[index],isClickable: isSelectableCategories,onClick: (){Navigator.of(context).pop();},);
+              return CategoryTile(category: bloc.categories[index],isClickable: isSelectableCategories,onSelectCategory: onSelect,);
             },
             separatorBuilder: (context, index) {
               return const SizedBox(

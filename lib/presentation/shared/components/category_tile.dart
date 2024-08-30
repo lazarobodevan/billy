@@ -14,11 +14,11 @@ import '../../screens/categories/category_bloc/category_bloc.dart';
 
 class CategoryTile extends StatefulWidget {
   final bool? isClickable;
-  final Function onClick;
+  final Function(TransactionCategory category) onSelectCategory;
   final TransactionCategory category;
 
   const CategoryTile(
-      {super.key, required this.category, this.isClickable = true, required this.onClick});
+      {super.key, required this.category, this.isClickable = true, required this.onSelectCategory});
 
   @override
   State<CategoryTile> createState() => _CategoryTileState();
@@ -61,9 +61,8 @@ class _CategoryTileState extends State<CategoryTile> {
     final categoryCopy = widget.category.copyWith(
       subcategories: subcategory != null ? [subcategory] : [],
     );
-    BlocProvider.of<AddTransactionBloc>(context)
-        .add(ChangeCategoryEvent(category: categoryCopy));
-    widget.onClick();
+
+    widget.onSelectCategory(categoryCopy);
   }
 
   @override

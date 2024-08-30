@@ -1,3 +1,4 @@
+import 'package:billy/models/transaction/transaction_model.dart';
 import 'package:billy/presentation/screens/add_transaction/add_transaction.dart';
 import 'package:billy/presentation/screens/add_transaction/bloc/add_transaction_bloc.dart';
 import 'package:billy/presentation/screens/categories/categories.dart';
@@ -5,6 +6,7 @@ import 'package:billy/presentation/screens/categories/category_bloc/category_blo
 import 'package:billy/presentation/screens/categories/subcategory_bloc/subcategory_bloc.dart';
 import 'package:billy/presentation/screens/nav_pages/nav_page.dart';
 import 'package:billy/presentation/screens/nav_pages/transactions/bloc/transactions_bloc.dart';
+import 'package:billy/presentation/screens/transaction_editor/transaction_editor.dart';
 import 'package:billy/repositories/balance/balance_repository.dart';
 import 'package:billy/repositories/category/category_repository.dart';
 import 'package:billy/repositories/database_helper.dart';
@@ -34,13 +36,13 @@ class MyApp extends StatelessWidget {
         RepositoryProvider(create: (context) => TransactionRepository()),
         RepositoryProvider(create: (context) => CategoryRepository()),
         RepositoryProvider(create: (context) => SubcategoryRepository()),
-        RepositoryProvider(create: (context)=> BalanceRepository()),
+        RepositoryProvider(create: (context) => BalanceRepository()),
         BlocProvider(
           create: (context) => AddTransactionBloc(
-            transactionRepository:
-                RepositoryProvider.of<TransactionRepository>(context),
-            balanceRepository: RepositoryProvider.of<BalanceRepository>(context)
-          ),
+              transactionRepository:
+                  RepositoryProvider.of<TransactionRepository>(context),
+              balanceRepository:
+                  RepositoryProvider.of<BalanceRepository>(context)),
         ),
         BlocProvider(
           create: (context) => CategoryBloc(
@@ -53,7 +55,10 @@ class MyApp extends StatelessWidget {
             repository: RepositoryProvider.of<SubcategoryRepository>(context),
           ),
         ),
-        BlocProvider(create: (context)=> TransactionsBloc(transactionRepository: RepositoryProvider.of<TransactionRepository>(context)))
+        BlocProvider(
+            create: (context) => TransactionsBloc(
+                transactionRepository:
+                    RepositoryProvider.of<TransactionRepository>(context)))
       ],
       child: MaterialApp(
         title: 'Flutter Demo',
@@ -81,13 +86,21 @@ class MyApp extends StatelessWidget {
           "/transaction": (context) => AddTransaction(),
         },
         onGenerateRoute: (settings) {
-          if (settings.name == '/categories') {
-            return MaterialPageRoute(
-                builder: (context) => Categories(
-                      isSelectableCategories: settings.arguments as bool,
-                    ));
-          }
-        },
+        //   if (settings.name == '/categories') {
+        //     return MaterialPageRoute(
+        //       builder: (context) => Categories(
+        //         isSelectableCategories: settings.arguments as bool,
+        //       ),
+        //     );
+        //   }
+        //   if (settings.name == '/editTransaction') {
+        //     return MaterialPageRoute(
+        //       builder: (context) => TransactionEditor(
+        //         transaction: settings.arguments as Transaction,
+        //       ),
+        //     );
+        //   }
+         },
       ),
     );
   }

@@ -13,6 +13,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../enums/transaction/payment_method.dart';
+import '../../../models/category/transaction_category.dart';
+
 class AddTransaction extends StatefulWidget {
   @override
   _AddTransactionState createState() => _AddTransactionState();
@@ -57,6 +60,17 @@ class _AddTransactionState extends State<AddTransaction> {
     BlocProvider.of<AddTransactionBloc>(context).add(EraseValue());
   }
 
+  onSelectPaymentMethod(PaymentMethod paymentMethod) {
+    BlocProvider.of<AddTransactionBloc>(context)
+        .add(ChangePaymentMethod(paymentMethod: paymentMethod));
+  }
+
+  onSelectCategory(TransactionCategory category) {
+    BlocProvider.of<AddTransactionBloc>(context)
+        .add(ChangeCategoryEvent(category: category));
+    Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
@@ -78,59 +92,76 @@ class _AddTransactionState extends State<AddTransaction> {
       ),
       backgroundColor: ThemeColors.primary2,
       body: SafeArea(
-        child: Column(
-          children: [
-            Center(child: ToggleTransactionType()),
-            BlocBuilder<AddTransactionBloc, AddTransactionState>(
-              bloc: BlocProvider.of<AddTransactionBloc>(context),
-              builder: (context, state) {
-                return Container(
-                  width: screenSize.width,
-                  height: 300,
-                  decoration: const BoxDecoration(
-                    color: ThemeColors.primary1,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 16),
-                        child: SizedBox(
-                          width: double.maxFinite,
-                          height: 200,
-                          child: Align(
-                            alignment: Alignment.bottomRight,
-                            child: AutoSizeText(
-                              formatCurrency(valueText),
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: screenSize.height * .11),
-                              maxLines: 1,
-                              textAlign: TextAlign.right,
-                            ),
+        child: BlocBuilder<AddTransactionBloc, AddTransactionState>(
+            builder: (context, state) {
+          return Column(
+            children: [
+              Center(
+                  child: ToggleTransactionType(
+                transactionType: BlocProvider.of<AddTransactionBloc>(context)
+                    .transaction
+                    .type,
+                onChanged: (value) =>
+                    BlocProvider.of<AddTransactionBloc>(context)
+                        .add(ChangeTransactionType(transactionType: value)),
+              )),
+              Container(
+                width: screenSize.width,
+                height: 300,
+                decoration: const BoxDecoration(
+                  color: ThemeColors.primary1,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 16),
+                      child: SizedBox(
+                        width: double.maxFinite,
+                        height: 200,
+                        child: Align(
+                          alignment: Alignment.bottomRight,
+                          child: AutoSizeText(
+                            formatCurrency(valueText),
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: screenSize.height * .11),
+                            maxLines: 1,
+                            textAlign: TextAlign.right,
                           ),
                         ),
                       ),
-                      const PaymentMethodSelector()
-                    ],
-                  ),
-                );
-              },
-            ),
-            Expanded(
-              child: Column(
-                children: [
-                  _buildDigitRow([7, 8, 9]),
-                  _buildDigitRow([4, 5, 6]),
-                  _buildDigitRow([1, 2, 3]),
-                  _buildDigitRow([null, 0, null],
-                      isLastRow: true, onErase: onErase),
-                ],
+                    ),
+                    PaymentMethodSelector(
+                      onPaymentMethodChanged: onSelectPaymentMethod,
+                      onCategoryChanged: onSelectCategory,
+                      selectedCategory:
+                          BlocProvider.of<AddTransactionBloc>(context)
+                              .transaction
+                              .category,
+                      selectedPaymentMethod:
+                          BlocProvider.of<AddTransactionBloc>(context)
+                              .transaction
+                              .paymentMethod,
+                    )
+                  ],
+                ),
               ),
-            )
-          ],
-        ),
+              Expanded(
+                child: Column(
+                  children: [
+                    _buildDigitRow([7, 8, 9]),
+                    _buildDigitRow([4, 5, 6]),
+                    _buildDigitRow([1, 2, 3]),
+                    _buildDigitRow([null, 0, null],
+                        isLastRow: true, onErase: onErase),
+                  ],
+                ),
+              )
+            ],
+          );
+        }),
       ),
     );
   }
@@ -162,9 +193,8 @@ class _AddTransactionState extends State<AddTransaction> {
   void _showTransactionDetailsDialog(BuildContext context) {
     showDialog(
         context: context,
-        builder: (BuildContext context){
+        builder: (BuildContext context) {
           return const TransactionDetailsForm();
-        }
-    );
+        });
   }
 }

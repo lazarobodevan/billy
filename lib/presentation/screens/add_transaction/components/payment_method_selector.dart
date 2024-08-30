@@ -1,21 +1,31 @@
+import 'package:billy/enums/transaction/transaction_type.dart';
 import 'package:billy/presentation/screens/add_transaction/add_transaction.dart';
 import 'package:billy/presentation/screens/add_transaction/add_transaction.dart';
 import 'package:billy/presentation/screens/add_transaction/bloc/add_transaction_bloc.dart';
+import 'package:billy/presentation/screens/categories/categories.dart';
 import 'package:billy/presentation/theme/colors.dart';
 import 'package:billy/presentation/theme/typography.dart';
 import 'package:billy/enums/transaction/payment_method.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../models/category/transaction_category.dart';
+
 class PaymentMethodSelector extends StatelessWidget {
-  const PaymentMethodSelector({super.key});
+  final ValueChanged<PaymentMethod> onPaymentMethodChanged;
+  final ValueChanged<TransactionCategory> onCategoryChanged;
+  final TransactionCategory? selectedCategory;
+  final PaymentMethod? selectedPaymentMethod;
 
-  onSelect(AddTransactionBloc bloc, PaymentMethod paymentMethod) {
-    bloc.add(ChangePaymentMethod(paymentMethod: paymentMethod));
-  }
+  const PaymentMethodSelector(
+      {super.key,
+      this.selectedPaymentMethod,
+      this.selectedCategory,
+      required this.onPaymentMethodChanged,
+      required this.onCategoryChanged});
 
-  onGetSelectedCategory(AddTransactionBloc bloc) {
-    final category = bloc.transaction.category;
+  onGetSelectedCategory() {
+    final category = selectedCategory;
     if (category != null && category.id != null) {
       if (category.subcategories != null &&
           category.subcategories!.isNotEmpty) {
@@ -28,117 +38,114 @@ class PaymentMethodSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AddTransactionBloc, AddTransactionState>(
-      builder: (context, state) {
-        var bloc = BlocProvider.of<AddTransactionBloc>(context);
-        var selected = bloc.transaction.paymentMethod;
-        return Material(
-          child: Row(
-            children: [
-              Expanded(
-                child: Container(
-                  height: 60,
-                  decoration: BoxDecoration(color: ThemeColors.primary1),
-                  child: DropdownButton(
-                    onChanged: (value) {},
-                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                    isExpanded: true,
-                    isDense: true,
-                    underline: SizedBox(),
-                    iconSize: 38,
-                    dropdownColor: ThemeColors.primary1,
-                    value: selected,
-                    hint: Center(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.money_rounded,
-                            color: Colors.white,
-                          ),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          Text(
-                            "Dinheiro",
-                            style: TypographyStyles.label3()
-                                .copyWith(color: ThemeColors.primary3),
-                          ),
-                        ],
+    return Material(
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              height: 60,
+              decoration: BoxDecoration(color: ThemeColors.primary1),
+              child: DropdownButton(
+                onChanged: (value) {},
+                padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                isExpanded: true,
+                isDense: true,
+                underline: SizedBox(),
+                iconSize: 38,
+                dropdownColor: ThemeColors.primary1,
+                value: selectedPaymentMethod,
+                hint: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.money_rounded,
+                        color: Colors.white,
                       ),
-                    ),
-                    items: [
-                      DropdownMenuItem(
-                          onTap: () {
-                            onSelect(bloc, PaymentMethod.PIX);
-                          },
-                          value: PaymentMethod.PIX,
-                          child: MoneyType(
-                              "Pix", Icons.currency_exchange_rounded)),
-                      DropdownMenuItem(
-                          onTap: () {
-                            onSelect(bloc, PaymentMethod.MONEY);
-                          },
-                          value: PaymentMethod.MONEY,
-                          child: MoneyType(
-                              "Dinheiro", Icons.attach_money_rounded)),
-                      DropdownMenuItem(
-                          onTap: () {
-                            onSelect(bloc, PaymentMethod.CREDIT_CARD);
-                          },
-                          value: PaymentMethod.CREDIT_CARD,
-                          child:
-                              MoneyType("Cartão", Icons.credit_card_rounded)),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      Text(
+                        "Dinheiro",
+                        style: TypographyStyles.label3()
+                            .copyWith(color: ThemeColors.primary3),
+                      ),
                     ],
                   ),
                 ),
+                items: [
+                  DropdownMenuItem(
+                      onTap: () {
+                        onPaymentMethodChanged(PaymentMethod.PIX);
+                      },
+                      value: PaymentMethod.PIX,
+                      child: MoneyType("Pix", Icons.currency_exchange_rounded)),
+                  DropdownMenuItem(
+                      onTap: () {
+                        onPaymentMethodChanged(PaymentMethod.MONEY);
+                      },
+                      value: PaymentMethod.MONEY,
+                      child: MoneyType("Dinheiro", Icons.attach_money_rounded)),
+                  DropdownMenuItem(
+                      onTap: () {
+                        onPaymentMethodChanged(PaymentMethod.CREDIT_CARD);
+                      },
+                      value: PaymentMethod.CREDIT_CARD,
+                      child: MoneyType("Cartão", Icons.credit_card_rounded)),
+                ],
               ),
-              const SizedBox(
-                width: 1,
-              ),
-              Expanded(
-                child: InkWell(
-                  onTap: () {
-                    Navigator.of(context).pushNamed("/categories",
-                        arguments: true);
-                  },
-                  child: Ink(
-                    height: 60,
-                    decoration: BoxDecoration(color: ThemeColors.primary1),
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Icon(
-                              onGetSelectedCategory(bloc) != null
-                                  ? onGetSelectedCategory(bloc).icon
-                                  : Icons.money_rounded,
-                              color: ThemeColors.primary3,
-                            ),
-                            const SizedBox(
-                              width: 5,
-                            ),
-                            Text(
-                              onGetSelectedCategory(bloc) != null
-                                  ? onGetSelectedCategory(bloc).name
-                                  : "Categoria",
-                              style: TypographyStyles.label3()
-                                  .copyWith(color: ThemeColors.primary3),
-                            )
-                          ],
+            ),
+          ),
+          const SizedBox(
+            width: 1,
+          ),
+          Expanded(
+            child: InkWell(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => Categories(
+                      onSelect: onCategoryChanged,
+                      isSelectableCategories: true,
+                    ),
+                  ),
+                );
+              },
+              child: Ink(
+                height: 60,
+                decoration: BoxDecoration(color: ThemeColors.primary1),
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Icon(
+                          onGetSelectedCategory() != null
+                              ? onGetSelectedCategory().icon
+                              : Icons.money_rounded,
+                          color: ThemeColors.primary3,
                         ),
-                      ),
+                        const SizedBox(
+                          width: 5,
+                        ),
+                        Text(
+                          onGetSelectedCategory() != null
+                              ? onGetSelectedCategory().name
+                              : "Categoria",
+                          style: TypographyStyles.label3()
+                              .copyWith(color: ThemeColors.primary3),
+                        )
+                      ],
                     ),
                   ),
                 ),
-              )
-            ],
-          ),
-        );
-      },
+              ),
+            ),
+          )
+        ],
+      ),
     );
   }
 }

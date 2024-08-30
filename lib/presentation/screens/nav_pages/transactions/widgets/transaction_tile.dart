@@ -1,6 +1,7 @@
 import 'package:billy/enums/transaction/transaction_type.dart';
 import 'package:billy/models/category/transaction_category.dart';
 import 'package:billy/models/transaction/transaction_model.dart';
+import 'package:billy/presentation/screens/transaction_editor/transaction_editor.dart';
 import 'package:billy/presentation/theme/colors.dart';
 import 'package:billy/presentation/theme/typography.dart';
 import 'package:billy/utils/currency_formatter.dart';
@@ -130,7 +131,14 @@ class TransactionTile extends StatelessWidget {
                       return [
                         PopupMenuItem(
                           child: Text("Editar"),
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    TransactionEditor(transaction: transaction),
+                              ),
+                            );
+                          },
                         ),
                         PopupMenuItem(
                           child: Text("Deletar"),
@@ -154,7 +162,7 @@ class TransactionTile extends StatelessWidget {
                 ],
               ),
             ),
-            if(transaction.type == TransactionType.EXPENSE)
+            if (transaction.type == TransactionType.EXPENSE)
               Center(child: _buildIsPaidBadge())
           ],
         ),
@@ -167,7 +175,9 @@ class TransactionTile extends StatelessWidget {
       width: 80,
       height: 20,
       decoration: BoxDecoration(
-          color: transaction.isPaid == true ? ThemeColors.semanticGreen : ThemeColors.semanticRed,
+          color: transaction.isPaid == true
+              ? ThemeColors.semanticGreen
+              : ThemeColors.semanticRed,
           borderRadius: BorderRadius.circular(50)),
       child: Center(
         child: Text(
