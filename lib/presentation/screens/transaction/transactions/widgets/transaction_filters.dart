@@ -1,11 +1,8 @@
-import 'package:billy/models/transaction/transaction_model.dart';
-import 'package:billy/models/transaction/transaction_model.dart';
+import 'package:billy/presentation/screens/transaction/bloc/transaction_bloc.dart';
 import 'package:billy/presentation/shared/components/date_picker.dart';
 import 'package:billy/presentation/theme/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../bloc/transactions_bloc.dart';
 
 class TransactionFilters extends StatefulWidget {
   const TransactionFilters({super.key});
@@ -45,7 +42,7 @@ class _TransactionFiltersState extends State<TransactionFilters> {
   }
 
   Widget _buildFilters(BuildContext context) {
-    return BlocBuilder<TransactionsBloc, TransactionsState>(
+    return BlocBuilder<TransactionBloc, TransactionState>(
       builder: (context, state) {
         return Container(
           color: Colors.grey[200],

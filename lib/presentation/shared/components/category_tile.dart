@@ -1,6 +1,4 @@
 import 'package:billy/models/category/transaction_category.dart';
-import 'package:billy/models/transaction/transaction_model.dart';
-import 'package:billy/presentation/screens/add_transaction/bloc/add_transaction_bloc.dart';
 import 'package:billy/presentation/shared/components/category_editor_dialog.dart';
 import 'package:billy/presentation/theme/colors.dart';
 import 'package:billy/presentation/theme/typography.dart';

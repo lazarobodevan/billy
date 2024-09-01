@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:billy/presentation/screens/nav_pages/home/widgets/draggable_transactions_container.dart';
+import 'package:billy/presentation/screens/transaction/bloc/transaction_bloc.dart';
 import 'package:billy/presentation/shared/components/action_button.dart';
 import 'package:billy/presentation/theme/colors.dart';
 import 'package:billy/presentation/theme/typography.dart';
@@ -8,8 +9,6 @@ import 'package:billy/repositories/transaction/transaction_repository.dart';
 import 'package:billy/utils/currency_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../add_transaction/bloc/add_transaction_bloc.dart';
 import 'bloc/home_bloc.dart';
 
 class Home extends StatefulWidget {
@@ -116,7 +115,7 @@ class _HomeState extends State<Home> {
   }
 
   Widget _buildBalanceSection(LoadedHomeState state, bool isContainerHidden) {
-    return BlocListener<AddTransactionBloc, AddTransactionState>(
+    return BlocListener<TransactionBloc, TransactionState>(
       listener: (context, state) {
         if (state is SavedTransactionToDatabaseState) {
           BlocProvider.of<HomeBloc>(context).add(LoadHomeEvent());
@@ -128,7 +127,7 @@ class _HomeState extends State<Home> {
         decoration: BoxDecoration(
             gradient: isContainerHidden
                 ? LinearGradient(
-                    colors: [Colors.yellow.shade200, Colors.yellow.shade50],
+                    colors: [Color(0xfffbd07c), Color(0xfff7f779)],
                     end: Alignment.bottomRight,
                     begin: Alignment.topLeft)
                 : null,

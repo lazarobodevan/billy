@@ -3,55 +3,77 @@ import 'dart:async';
 import 'package:billy/enums/transaction/payment_method.dart';
 import 'package:billy/enums/transaction/transaction_type.dart';
 import 'package:billy/models/category/transaction_category.dart';
-import 'package:billy/models/subcategory/subcategory.dart';
 import 'package:billy/models/transaction/transaction_model.dart';
 import 'package:billy/repositories/balance/i_balance_repository.dart';
 import 'package:billy/repositories/transaction/i_transaction_repository.dart';
 import 'package:billy/use_cases/balance/set_balance_use_case.dart';
 import 'package:billy/use_cases/transaction/create_transaction_use_case.dart';
+import 'package:billy/use_cases/transaction/get_all_transactions_use_case.dart';
+import 'package:billy/use_cases/transaction/get_available_periods_use_case.dart';
+import 'package:billy/use_cases/transaction/update_transaction_use_case.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
-part 'add_transaction_event.dart';
+part 'transaction_event.dart';
 
-part 'add_transaction_state.dart';
+part 'transaction_state.dart';
 
-class AddTransactionBloc
-    extends Bloc<AddTransactionEvent, AddTransactionState> {
-
-  late final CreateTransactionUseCase _createTransactionUseCase;
-  late final SetBalanceUseCase _setBalanceUseCase;
-
+class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   final ITransactionRepository transactionRepository;
   final IBalanceRepository balanceRepository;
+
+  //Add new transaction variables
+  late final CreateTransactionUseCase _createTransactionUseCase;
+  late final SetBalanceUseCase _setBalanceUseCase;
 
   late int amountInCents;
   late Transaction transaction;
 
-  AddTransactionBloc(
+  //List transactions variables
+  late final GetAvailablePeriodsUseCase _getAvailablePeriodsUseCase;
+  late final GetAllTransactionsUseCase _getAllTransactionsUseCase;
+  late final UpdateTransactionUseCase _updateTransactionUseCase;
+
+  late List<String> periods;
+  late List<Transaction> transactions;
+
+  TransactionBloc(
       {required this.transactionRepository, required this.balanceRepository})
-      : super(AddTransactionInitial()) {
+      : super(TransactionInitial()) {
 
+    //****** USE CASES *******
     _setBalanceUseCase = SetBalanceUseCase(repository: balanceRepository);
-
     _createTransactionUseCase = CreateTransactionUseCase(
         transactionRepository: transactionRepository,
         setBalanceUseCase: _setBalanceUseCase);
+    _updateTransactionUseCase = UpdateTransactionUseCase(transactionRepository: transactionRepository);
 
+    //****** VARIABLES *******
     amountInCents = 0;
     transaction = Transaction.empty();
+    periods = [];
+    transactions = [];
 
-    on<ResetValue>((event, emit) {
-      amountInCents = 0;
-      transaction = Transaction.empty();
-      emit(const ValueChangedState(value: 0));
-    });
-
-    on<TriggerValue>((event, emit) {
+    on<TransactionValueDigitChangedEvent>((event, emit) {
       amountInCents = amountInCents * 10 + event.value;
       double parsedValue = amountInCents / 100.0;
       transaction.value = parsedValue;
       emit(ValueChangedState(value: parsedValue));
+    });
+
+    on<TransactionValueChangedEvent>((event, emit) {
+      final newValue = double.tryParse(event.value.replaceAll(',', '.').replaceAll("R\$", "")) ?? 0.0;
+      amountInCents = (newValue * 100).round();
+      transaction.value = newValue;
+      emit(ValueChangedState(value: newValue));
+    });
+
+    on<ResetTransaction>((event, emit){
+      amountInCents = 0;
+      transaction = Transaction.empty();
+      periods = [];
+      transactions = [];
+      emit(TransactionInitial());
     });
 
     on<EraseValue>((event, emit) {
@@ -63,7 +85,14 @@ class AddTransactionBloc
       }
     });
 
-    on<ChangeTransactionType>((event, emit) {
+    on<SetTransactionEvent>((event, emit) {
+      emit(ValueChangedState(value: 0));
+      transaction = event.transaction.copyWith();
+      amountInCents = (transaction.value * 100).toInt();
+      emit(TransactionInitial());
+    });
+
+    on<TransactionTypeChangedEvent>((event, emit) {
       transaction = transaction.copyWith(type: event.transactionType);
 
       if (transaction.type == TransactionType.INCOME) {
@@ -73,32 +102,32 @@ class AddTransactionBloc
       emit(TransactionTypeChangedState(transactionType: transaction.type));
     });
 
-    on<ChangePaymentMethod>((event, emit) {
+    on<TransactionPaymentMethodChangedEvent>((event, emit) {
       transaction.paymentMethod = event.paymentMethod;
       emit(PaymentMethodChangedState(paymentMethod: transaction.paymentMethod));
     });
 
-    on<ChangeCategoryEvent>((event, emit) {
+    on<TransactionCategoryChangedEvent>((event, emit) {
       transaction = transaction.copyWith(category: event.category);
       emit(TransactionCategoryChangedState(category: event.category));
     });
 
-    on<ChangeTransactionDateEvent>((event, emit) {
+    on<TransactionDateChangedEvent>((event, emit) {
       transaction = transaction.copyWith(date: event.date);
       //TODO: Add emit state
     });
 
-    on<ChangeTransactionEndDateEvent>((event, emit) {
+    on<TransactionEndDateChangedEvent>((event, emit) {
       transaction = transaction.copyWith(endDate: event.date);
       //TODO: Add emit state
     });
 
-    on<ChangeTransactionIsPaidEvent>((event, emit) {
+    on<TransactionIsPaidChangedEvent>((event, emit) {
       transaction = transaction.copyWith(isPaid: event.isPaid);
-      //TODO: Add emit state
+      emit(TransactionIsPaidChangedState(isPaid: transaction.isPaid!));
     });
 
-    on<ChangeTransactionNameEvent>((event, emit) {
+    on<TransactionNameChangedEvent>((event, emit) {
       transaction = transaction.copyWith(name: event.name);
       emit(TransactionNameChangedState(name: event.name));
     });
@@ -108,6 +137,12 @@ class AddTransactionBloc
       final createdTransaction =
           await _createTransactionUseCase.execute(transaction);
       emit(SavedTransactionToDatabaseState(transaction: createdTransaction));
+    });
+
+    on<UpdateTransactionToDatabaseEvent>((event, emit) async{
+      emit(SavingTransactionToDatabaseState());
+      final updated = await _updateTransactionUseCase.execute(transaction);
+      emit(SavedTransactionToDatabaseState(transaction: updated));
     });
   }
 }

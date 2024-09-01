@@ -1,15 +1,11 @@
 import 'package:billy/enums/transaction/transaction_type.dart';
-import 'package:billy/presentation/screens/add_transaction/add_transaction.dart';
-import 'package:billy/presentation/screens/add_transaction/add_transaction.dart';
-import 'package:billy/presentation/screens/add_transaction/bloc/add_transaction_bloc.dart';
+import 'package:billy/models/category/transaction_category.dart';
+
 import 'package:billy/presentation/screens/categories/categories.dart';
 import 'package:billy/presentation/theme/colors.dart';
 import 'package:billy/presentation/theme/typography.dart';
 import 'package:billy/enums/transaction/payment_method.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../../../models/category/transaction_category.dart';
 
 class PaymentMethodSelector extends StatelessWidget {
   final ValueChanged<PaymentMethod> onPaymentMethodChanged;

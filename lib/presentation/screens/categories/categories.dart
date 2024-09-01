@@ -4,10 +4,7 @@ import 'package:billy/presentation/shared/components/category_tile.dart';
 import 'package:billy/presentation/theme/colors.dart';
 import 'package:billy/presentation/theme/typography.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../add_transaction/bloc/add_transaction_bloc.dart';
 import 'category_bloc/category_bloc.dart';
 
 class Categories extends StatelessWidget {

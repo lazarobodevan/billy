@@ -1,9 +1,8 @@
-import 'package:billy/presentation/screens/categories/categories.dart';
 import 'package:billy/presentation/screens/nav_pages/home/bloc/home_bloc.dart';
 import 'package:billy/presentation/screens/nav_pages/home/home.dart';
 import 'package:billy/presentation/screens/nav_pages/insights/insights.dart';
 import 'package:billy/presentation/screens/nav_pages/more/more.dart';
-import 'package:billy/presentation/screens/nav_pages/transactions/transactions.dart';
+import 'package:billy/presentation/screens/transaction/transactions/transactions.dart';
 import 'package:billy/presentation/theme/colors.dart';
 import 'package:billy/repositories/balance/balance_repository.dart';
 import 'package:billy/repositories/transaction/transaction_repository.dart';

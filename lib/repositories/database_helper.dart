@@ -91,9 +91,9 @@ class DatabaseHelper {
     ''');
 
     //DEFAULT TRANSACTION TYPES
-    await db.insert('transaction_types', {'name': 'TRANSFER'});
-    await db.insert('transaction_types', {'name': 'EXPENSE'});
     await db.insert('transaction_types', {'name': 'INCOME'});
+    await db.insert('transaction_types', {'name': 'EXPENSE'});
+    await db.insert('transaction_types', {'name': 'TRANSFER'});
 
     //DEFAULT PAYMENT METHODS
     await db.insert('payment_methods', {'name': 'PIX'});

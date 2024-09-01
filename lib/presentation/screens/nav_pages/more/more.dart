@@ -1,3 +1,4 @@
+import 'package:billy/presentation/screens/categories/categories.dart';
 import 'package:billy/presentation/screens/nav_pages/more/widgets/more_item.dart';
 import 'package:billy/presentation/theme/colors.dart';
 import 'package:flutter/material.dart';
@@ -9,8 +10,9 @@ class More extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          automaticallyImplyLeading: false,
-          backgroundColor: ThemeColors.primary3,),
+        automaticallyImplyLeading: false,
+        backgroundColor: ThemeColors.primary3,
+      ),
       backgroundColor: ThemeColors.primary3,
       body: SingleChildScrollView(
         child: Padding(
@@ -26,8 +28,20 @@ class More extends StatelessWidget {
                     borderRadius: BorderRadius.circular(50),
                     color: ThemeColors.primary1),
               ),
-              const SizedBox(height: 36,),
-              MoreItem(text: "Categorias", icon: Icons.add, onClick: (){Navigator.of(context).pushNamed('/categories', arguments: false);})
+              const SizedBox(
+                height: 36,
+              ),
+              MoreItem(
+                  text: "Categorias",
+                  icon: Icons.add,
+                  onClick: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => Categories(
+                        onSelect: (val) {},
+                        isSelectableCategories: false,
+                      ),
+                    ));
+                  })
             ],
           ),
         ),

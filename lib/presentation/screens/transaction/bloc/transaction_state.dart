@@ -1,15 +1,20 @@
-part of 'add_transaction_bloc.dart';
+part of 'transaction_bloc.dart';
 
-abstract class AddTransactionState extends Equatable {
-  const AddTransactionState();
+abstract class TransactionState extends Equatable {
+  const TransactionState();
 }
 
-class AddTransactionInitial extends AddTransactionState {
+class TransactionInitial extends TransactionState {
   @override
   List<Object> get props => [];
 }
 
-class ValueChangedState extends AddTransactionState{
+class AddTransactionInitial extends TransactionState {
+  @override
+  List<Object> get props => [];
+}
+
+class ValueChangedState extends TransactionState{
   final double value;
 
   const ValueChangedState({required this.value});
@@ -19,7 +24,7 @@ class ValueChangedState extends AddTransactionState{
 
 }
 
-class TransactionTypeChangedState extends AddTransactionState{
+class TransactionTypeChangedState extends TransactionState{
   final TransactionType transactionType;
 
   const TransactionTypeChangedState({required this.transactionType});
@@ -28,7 +33,7 @@ class TransactionTypeChangedState extends AddTransactionState{
   List<Object?> get props => [transactionType];
 }
 
-class PaymentMethodChangedState extends AddTransactionState{
+class PaymentMethodChangedState extends TransactionState{
   final PaymentMethod paymentMethod;
 
   const PaymentMethodChangedState({required this.paymentMethod});
@@ -37,7 +42,7 @@ class PaymentMethodChangedState extends AddTransactionState{
   List<Object?> get props => [paymentMethod];
 }
 
-class TransactionCategoryChangedState extends AddTransactionState{
+class TransactionCategoryChangedState extends TransactionState{
 
   final TransactionCategory category;
 
@@ -48,7 +53,7 @@ class TransactionCategoryChangedState extends AddTransactionState{
 
 }
 
-class TransactionNameChangedState extends AddTransactionState{
+class TransactionNameChangedState extends TransactionState{
 
   final String name;
 
@@ -59,12 +64,23 @@ class TransactionNameChangedState extends AddTransactionState{
 
 }
 
-class SavingTransactionToDatabaseState extends AddTransactionState{
+class TransactionIsPaidChangedState extends TransactionState{
+
+  final bool isPaid;
+
+  const TransactionIsPaidChangedState({required this.isPaid});
+
+  @override
+  List<Object?> get props => [isPaid];
+
+}
+
+class SavingTransactionToDatabaseState extends TransactionState{
   @override
   List<Object?> get props => [];
 }
 
-class SavedTransactionToDatabaseState extends AddTransactionState{
+class SavedTransactionToDatabaseState extends TransactionState{
   final Transaction transaction;
 
   const SavedTransactionToDatabaseState({required this.transaction});
@@ -73,3 +89,5 @@ class SavedTransactionToDatabaseState extends AddTransactionState{
   List<Object?> get props => [transaction];
 
 }
+
+

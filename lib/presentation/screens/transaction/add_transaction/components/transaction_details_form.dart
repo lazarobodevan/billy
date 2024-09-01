@@ -1,12 +1,11 @@
+import 'package:billy/enums/transaction/transaction_type.dart';
+import 'package:billy/presentation/screens/transaction/bloc/transaction_bloc.dart';
+import 'package:billy/presentation/shared/components/date_picker.dart';
+import 'package:billy/presentation/theme/colors.dart';
+import 'package:billy/presentation/theme/typography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../../../enums/transaction/transaction_type.dart';
-import '../../../shared/components/date_picker.dart';
-import '../../../theme/colors.dart';
-import '../../../theme/typography.dart';
-import '../bloc/add_transaction_bloc.dart';
 
 class TransactionDetailsForm extends StatefulWidget {
   const TransactionDetailsForm({super.key});
@@ -26,12 +25,14 @@ class _TransactionDetailsFormState extends State<TransactionDetailsForm> {
 
 
   void onSave() {
-    final bloc = BlocProvider.of<AddTransactionBloc>(context);
-    bloc.add(ChangeTransactionIsPaidEvent(isPaid: isPaid));
-    bloc.add(ChangeTransactionDateEvent(date: beginDate));
-    bloc.add(ChangeTransactionEndDateEvent(date: endDate));
-    bloc.add(ChangeTransactionNameEvent(name: _controller.text));
+
+    final bloc = BlocProvider.of<TransactionBloc>(context);
+    bloc.add(TransactionIsPaidChangedEvent(isPaid: isPaid));
+    bloc.add(TransactionDateChangedEvent(date: beginDate));
+    bloc.add(TransactionEndDateChangedEvent(date: endDate));
+    bloc.add(TransactionNameChangedEvent(name: _controller.text));
     bloc.add(SaveTransactionToDatabaseEvent());
+
     Navigator.of(context).pop();
     Navigator.of(context).pop();
   }
@@ -49,7 +50,7 @@ class _TransactionDetailsFormState extends State<TransactionDetailsForm> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
     });
-    final bloc = BlocProvider.of<AddTransactionBloc>(context);
+    final bloc = BlocProvider.of<TransactionBloc>(context);
     return AlertDialog(
       title: Text(
         "Detalhes da transação",
