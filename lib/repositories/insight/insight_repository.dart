@@ -1,9 +1,12 @@
 import 'package:billy/enums/transaction/transaction_type.dart';
 import 'package:billy/models/insight/insight.dart';
 import 'package:billy/models/insight/line_chart_data.dart';
+import 'package:billy/models/insight/my_line_chart_spots.dart';
 import 'package:billy/models/insight/period_filter.dart';
 import 'package:billy/repositories/database_helper.dart';
 import 'package:billy/repositories/insight/i_insight_repository.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/material.dart';
 
 class InsightRepository extends IInsightRepository {
   final DatabaseHelper _databaseHelper = DatabaseHelper.instance;
@@ -113,7 +116,8 @@ class InsightRepository extends IInsightRepository {
     // Ajustar a query para pegar o intervalo de todo o ano
     String query = '''
       SELECT SUM(transactions.value) as total,
-      strftime('%m', transactions.date) AS month
+      strftime('%m', transactions.date) AS month,
+      transactions.type_id as type
       FROM transactions
       $filterWhere
       AND transactions.date >= ?
@@ -129,20 +133,52 @@ class InsightRepository extends IInsightRepository {
           .toIso8601String() // Fim do ano
     ]);
 
-    MyLineChartData data =
-        MyLineChartData(minValue: 0, maxValue: 0, values: {});
+    MyLineChartData data = MyLineChartData(minValue: 0, maxValue: 0, spots: []);
+
+    MyLineChartSpots incomeSpots = MyLineChartSpots(
+        spots: [],
+        lineColor: Colors.transparent,
+        transactionType: TransactionType.INCOME);
+
+    MyLineChartSpots expenseSpots = MyLineChartSpots(
+        spots: [],
+        lineColor: Colors.transparent,
+        transactionType: TransactionType.EXPENSE);
 
     result.forEach((el) {
-      int month = int.parse(el['month'] as String)-1;
+
+      int month = int.parse(el['month'] as String) - 1;
       double total = (el['total'] as num).toDouble();
-      data.values[month] = total;
+      if (el['type'] ==
+          TransactionTypeExtension.toDatabase(TransactionType.EXPENSE)) {
+        expenseSpots.spots.add(FlSpot(month.toDouble(), total));
+      } else {
+        incomeSpots.spots.add(FlSpot(month.toDouble(), total));
+      }
+
     });
 
+    data.spots = [expenseSpots, incomeSpots];
+
+    double minY = 0;
+    double maxY = 0;
+
     // Encontrar o valor mínimo e máximo nos valores retornados
-    if (data.values.isNotEmpty) {
-      data.minValue = data.values.values.reduce((a, b) => a < b ? a : b);
-      data.maxValue = data.values.values.reduce((a, b) => a > b ? a : b);
-    }
+    data.spots.forEach((line) {
+      if (line.spots.isNotEmpty) {
+        double lineMinY =
+            line.spots.map((spot) => spot.y).reduce((a, b) => a < b ? a : b);
+        double lineMaxY =
+            line.spots.map((spot) => spot.y).reduce((a, b) => a > b ? a : b);
+
+        // Atualizar os valores mínimos e máximos gerais
+        if (lineMinY < minY) minY = lineMinY;
+        if (lineMaxY > maxY) maxY = lineMaxY;
+      }
+    });
+
+    data.minValue = minY;
+    data.maxValue = maxY;
 
     return data;
   }

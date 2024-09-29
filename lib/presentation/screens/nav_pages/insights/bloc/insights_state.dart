@@ -9,7 +9,13 @@ class InsightsInitial extends InsightsState {
   List<Object> get props => [];
 }
 
-class LoadingInsights extends InsightsState{
+class LoadingIncomesInsights extends InsightsState{
+  @override
+  List<Object?> get props => [];
+
+}
+
+class LoadingExpensesInsights extends InsightsState{
   @override
   List<Object?> get props => [];
 

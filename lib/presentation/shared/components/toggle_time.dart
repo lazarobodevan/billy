@@ -1,69 +1,55 @@
+import 'package:billy/presentation/theme/colors.dart';
 import 'package:billy/presentation/theme/typography.dart';
+import 'package:billy/utils/date_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_date_pickers/flutter_date_pickers.dart';
 
 class ToggleTime extends StatefulWidget {
-  const ToggleTime({super.key});
+  
+  final DatePeriod? selectedDate;
+  final ValueChanged<DatePeriod> onSelect;
+  
+  const ToggleTime({super.key, this.selectedDate, required this.onSelect});
 
   @override
   State<ToggleTime> createState() => _ToggleTimeState();
 }
 
 class _ToggleTimeState extends State<ToggleTime> {
-  var selected = 1;
 
-  void setSelected(int index) {
-    setState(() {
-      selected = index;
-    });
+  late DatePeriod _selectedDate;
+
+  @override
+  void initState() {
+    _selectedDate = widget.selectedDate ?? DatePeriod(MyDateUtils.getFirstDayOfMonth(), MyDateUtils.getLastDayOfMonth());
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onHorizontalDragEnd: (DragEndDetails details) {
-        if (details.velocity.pixelsPerSecond.dx > 0) {
-          // Arrastou para a direita
-          setSelected((selected + 1) % 2); // Aumenta e mantém no intervalo 0-2
-        } else if (details.velocity.pixelsPerSecond.dx < 0) {
-          // Arrastou para a esquerda
-          setSelected(
-              (selected - 1 + 2) % 2); // Diminui e mantém no intervalo 0-2
-        }
-      },
-      child: Container(
-        height: 40,
-        width: 300,
-        color: Colors.white,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(width: 10,),
-            GestureDetector(
-              onTap: () {
-                setSelected(0);
-              },
-              child: AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 100),
-                style: selected == 0
-                    ? TypographyStyles.label1().copyWith(color: Colors.black)
-                    : TypographyStyles.paragraph4().copyWith(color: Colors.grey),
-                child: const Text("Mês"),
-              ),
-            ),
-            const SizedBox(width: 10,),
-            GestureDetector(
-              onTap: () {
-                setSelected(1);
-              },
-              child: AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 100),
-                style: selected == 1
-                    ? TypographyStyles.label1().copyWith(color: Colors.black)
-                    : TypographyStyles.paragraph4().copyWith(color: Colors.grey),
-                child: const Text("Ano"),
-              ),
-            ),
-          ],
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: ()async{
+          final result = await showDateRangePicker(context: context, firstDate: DateTime(2000), lastDate: DateTime.now().add(const Duration(days: 365)));
+      
+          if(result != null){
+            setState(() {
+              _selectedDate = DatePeriod(result.start, result.end);
+              widget.onSelect(_selectedDate);
+            });
+          }
+        },
+        child: Ink(
+          width: 150,
+          height: 30,
+          decoration: BoxDecoration(
+            border: Border.all(color: ThemeColors.primary1, width: 1),
+            borderRadius: BorderRadius.circular(50),
+          ),
+          child: Center(
+            child: Text(MyDateUtils.formatDateRange(_selectedDate.start, _selectedDate.end),style: TypographyStyles.paragraph4(),),
+          ) ,
         ),
       ),
     );

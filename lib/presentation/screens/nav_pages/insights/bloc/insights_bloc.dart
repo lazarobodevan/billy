@@ -30,14 +30,24 @@ class InsightsBloc extends Bloc<InsightsEvent, InsightsState> {
 
     on<GetInsightEvent>((event, emit) async {
       try {
-        emit(LoadingInsights());
+        if(event.insightsTab == InsightTabEnum.EXPENSE){
+          emit(LoadingExpensesInsights());
+        }
+        if(event.insightsTab == InsightTabEnum.INCOME) {
+          emit(LoadingIncomesInsights());
+        }
         final insight = await getInsightUseCase.execute(
             periodFilter: event.periodFilter,
             type: event.type,
             groupByCategory: event.groupByCategory,
             showExpenses: _showExpenses(event.insightsTab),
             showIncomes: _showIncomes(event.insightsTab));
-
+        if(event.insightsTab == InsightTabEnum.EXPENSE){
+          expensesInsight = insight;
+        }
+        if(event.insightsTab == InsightTabEnum.INCOME){
+          incomeInsight = insight;
+        }
         emit(LoadedInsights(insight: insight));
       } catch (e) {
         emit(LoadingInsightsError());

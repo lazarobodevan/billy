@@ -1,3 +1,4 @@
+import 'package:billy/models/insight/my_line_chart_spots.dart';
 import 'package:billy/presentation/theme/typography.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,7 @@ class MyLineChart extends StatelessWidget {
   final double maxX;
   final double maxY;
   final Function? getXLabels;
-  final List<FlSpot>? spots;
+  final List<MyLineChartSpots>? spots;
 
   const MyLineChart(
       {super.key,
@@ -29,6 +30,7 @@ class MyLineChart extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Text(
           text,
@@ -37,65 +39,76 @@ class MyLineChart extends StatelessWidget {
         const SizedBox(
           height: 20,
         ),
-        spots != null && spots!.isNotEmpty ? Container(
-          height: 200,
-          child: LineChart(
-            LineChartData(
-              minX: minX,
-              maxX: maxX,
-              minY: minY,
-              maxY: maxY,
-              baselineY: minY,
-              lineTouchData:
-                  LineTouchData(touchTooltipData: LineTouchTooltipData(
-                getTooltipItems: (List<LineBarSpot> touchedSpots) {
-                  return touchedSpots.map((LineBarSpot touchedSpot) {
-                    return LineTooltipItem(
-                      '${touchedSpot.y}',
-                      TextStyle(
-                        color: Colors.white, // Cor do texto do tooltip
-                        fontWeight: FontWeight.bold,
+        spots != null && spots!.isNotEmpty
+            ? Container(
+                height: 200,
+                child: LineChart(
+                  LineChartData(
+                    minX: minX,
+                    maxX: maxX,
+                    minY: minY,
+                    maxY: maxY,
+                    baselineY: minY,
+                    lineTouchData:
+                        LineTouchData(touchTooltipData: LineTouchTooltipData(
+                      getTooltipItems: (List<LineBarSpot> touchedSpots) {
+                        return touchedSpots.map((LineBarSpot touchedSpot) {
+                          return LineTooltipItem(
+                            '${touchedSpot.y}',
+                            TextStyle(
+                              color: Colors.white, // Cor do texto do tooltip
+                              fontWeight: FontWeight.bold,
+                            ),
+                          );
+                        }).toList();
+                      },
+                    )),
+                    titlesData: const FlTitlesData(
+                      show: true,
+                      leftTitles: AxisTitles(
+                        sideTitles:
+                            SideTitles(showTitles: true, reservedSize: 40),
                       ),
-                    );
-                  }).toList();
-                },
-              )),
-              titlesData: const FlTitlesData(
-                  show: true,
-                  topTitles:
-                      AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles:
-                      AxisTitles(sideTitles: SideTitles(showTitles: false, )),
-                  bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                          showTitles: true,
-                          reservedSize: 30,
-                          interval: 1,
-                          getTitlesWidget: bottomTitleWidgets))),
-              gridData: FlGridData(
-                show: true,
-                drawVerticalLine: false,
-              ),
-              borderData: FlBorderData(show: false),
-              lineBarsData: [
-                LineChartBarData(
-                  isCurved: true,
-                  barWidth: 3,
-                  color: Colors.red,
-                  belowBarData: BarAreaData(
-                    show: true,
-                    gradient: belowChartColor ??
-                        const LinearGradient(
-                          begin: Alignment(0, 1),
-                          colors: [Colors.transparent, Colors.transparent],
+                      topTitles: AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                      rightTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: false,
                         ),
+                      ),
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: 30,
+                            interval: 1,
+                            getTitlesWidget: bottomTitleWidgets),
+                      ),
+                    ),
+                    gridData: FlGridData(
+                      show: true,
+                      drawVerticalLine: false,
+                    ),
+                    borderData: FlBorderData(show: false),
+                    lineBarsData: spots!.map((el)=> LineChartBarData(
+                      isCurved: true,
+                      barWidth: 3,
+                      color: el.lineColor,
+                      belowBarData: BarAreaData(
+                        show: true,
+                        gradient: belowChartColor ??
+                          const LinearGradient(begin:Alignment(0, 1),colors: [Colors.transparent, Colors.transparent]),
+                      ),
+                      spots: el.spots
+                    )).toList()
                   ),
-                  spots: spots ?? []
                 ),
-              ],
-            ),
-          ),
-        ): AspectRatio(aspectRatio:2, child: Center(child: Text("Sem registros suficientes"),)),
+              )
+            : AspectRatio(
+                aspectRatio: 2,
+                child: Center(
+                  child: Text("Sem registros suficientes"),
+                )),
       ],
     );
   }
