@@ -37,14 +37,15 @@ class MyLineChart extends StatelessWidget {
         const SizedBox(
           height: 20,
         ),
-        spots != null ? AspectRatio(
-          aspectRatio: 1.3,
+        spots != null && spots!.isNotEmpty ? Container(
+          height: 200,
           child: LineChart(
             LineChartData(
               minX: minX,
               maxX: maxX,
               minY: minY,
               maxY: maxY,
+              baselineY: minY,
               lineTouchData:
                   LineTouchData(touchTooltipData: LineTouchTooltipData(
                 getTooltipItems: (List<LineBarSpot> touchedSpots) {
@@ -64,7 +65,7 @@ class MyLineChart extends StatelessWidget {
                   topTitles:
                       AxisTitles(sideTitles: SideTitles(showTitles: false)),
                   rightTitles:
-                      AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      AxisTitles(sideTitles: SideTitles(showTitles: false, )),
                   bottomTitles: AxisTitles(
                       sideTitles: SideTitles(
                           showTitles: true,

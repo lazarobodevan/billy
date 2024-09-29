@@ -1,9 +1,12 @@
+import 'package:billy/presentation/screens/nav_pages/insights/bloc/insights_bloc.dart';
 import 'package:billy/presentation/screens/nav_pages/insights/tabs/expenses_tab.dart';
 import 'package:billy/presentation/screens/nav_pages/insights/tabs/incomes_tab.dart';
 import 'package:billy/presentation/screens/nav_pages/insights/tabs/insights_tab.dart';
 import 'package:billy/presentation/theme/colors.dart';
 import 'package:billy/presentation/theme/typography.dart';
+import 'package:billy/repositories/insight/insight_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class Insights extends StatefulWidget {
   const Insights({super.key});
@@ -12,16 +15,15 @@ class Insights extends StatefulWidget {
   State<Insights> createState() => _InsightsState();
 }
 
-class _InsightsState extends State<Insights> with SingleTickerProviderStateMixin {
+class _InsightsState extends State<Insights>
+    with SingleTickerProviderStateMixin {
   late TabController tabController;
 
   @override
   void initState() {
-    // TODO: implement initState
     tabController = TabController(length: 3, vsync: this);
     super.initState();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +38,7 @@ class _InsightsState extends State<Insights> with SingleTickerProviderStateMixin
         ),
         bottom: TabBar(
           controller: tabController,
-          tabs: [
+          tabs: const [
             Tab(
               text: "Despesas",
             ),
@@ -49,13 +51,19 @@ class _InsightsState extends State<Insights> with SingleTickerProviderStateMixin
           ],
         ),
       ),
-      body: TabBarView(
-        controller: tabController,
-          children: [
+      body: RepositoryProvider(
+        create: (context) => InsightRepository(),
+        child: BlocProvider(
+          create: (context) => InsightsBloc(
+              insightsRepository:
+                  RepositoryProvider.of<InsightRepository>(context)),
+          child: TabBarView(controller: tabController, children: const [
             ExpensesTab(),
             IncomesTab(),
-            InsightsTab()
-      ]),
+            InsightsTab(),
+          ]),
+        ),
+      ),
     );
   }
 }

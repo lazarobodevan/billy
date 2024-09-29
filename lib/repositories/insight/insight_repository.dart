@@ -1,0 +1,149 @@
+import 'package:billy/enums/transaction/transaction_type.dart';
+import 'package:billy/models/insight/insight.dart';
+import 'package:billy/models/insight/line_chart_data.dart';
+import 'package:billy/models/insight/period_filter.dart';
+import 'package:billy/repositories/database_helper.dart';
+import 'package:billy/repositories/insight/i_insight_repository.dart';
+
+class InsightRepository extends IInsightRepository {
+  final DatabaseHelper _databaseHelper = DatabaseHelper.instance;
+
+  @override
+  Future<Insight> getInsights(
+      {TransactionType? type = TransactionType.EXPENSE,
+      required PeriodFilter periodFilter,
+      bool? groupByCategory = true}) async {
+    final db = await _databaseHelper.database;
+
+    final String query = groupByCategory!
+        ? '''
+        -- Agrupamento por categoria
+        SELECT 
+          categories.id as group_id,
+          categories.name as group_name,
+          categories.color as group_color,
+          categories.icon as group_icon,
+          SUM(transactions.value) as total_value
+        FROM transactions
+        LEFT JOIN categories ON transactions.category_id = categories.id
+        LEFT JOIN subcategories ON transactions.subcategory_id = subcategories.id
+        WHERE transactions.type_id = ${TransactionTypeExtension.toDatabase(type!)}
+        AND transactions.date >= ?
+        AND (transactions.end_date IS NULL OR transactions.end_date <= ?)
+        GROUP BY categories.id, categories.name, categories.color, categories.icon
+        '''
+        : '''
+        -- Agrupamento por subcategoria
+        SELECT 
+          subcategories.id as group_id,
+          subcategories.name as group_name,
+          subcategories.color as group_color,
+          subcategories.icon as group_icon,
+          SUM(transactions.value) as total_value
+        FROM transactions
+        LEFT JOIN categories ON transactions.category_id = categories.id
+        LEFT JOIN subcategories ON transactions.subcategory_id = subcategories.id
+        WHERE transactions.type_id = ${TransactionTypeExtension.toDatabase(type!)}
+        AND subcategories.id IS NOT NULL
+        AND transactions.date >= ?
+        AND (transactions.end_date IS NULL OR transactions.end_date <= ?)
+        GROUP BY subcategories.id, subcategories.name, subcategories.color, subcategories.icon
+
+        UNION ALL
+
+        -- Transações não especificadas (sem subcategoria)
+        SELECT 
+          categories.id as group_id,
+          'Unspecified' as group_name,
+          categories.color as group_color,
+          categories.icon as group_icon,
+          SUM(transactions.value) - (
+            SELECT COALESCE(SUM(t2.value), 0)
+            FROM transactions t2
+            WHERE t2.category_id = categories.id
+            AND t2.subcategory_id IS NOT NULL
+          ) as total_value
+        FROM transactions
+        LEFT JOIN categories ON transactions.category_id = categories.id
+        WHERE transactions.type_id = ${TransactionTypeExtension.toDatabase(type!)}
+        AND transactions.subcategory_id IS NULL
+        AND transactions.date >= ?
+        AND (transactions.end_date IS NULL OR transactions.end_date <= ?)
+        GROUP BY categories.id, categories.name, categories.color, categories.icon
+        ''';
+
+    List<Map<String, Object?>> queryResult;
+
+    if (groupByCategory) {
+      queryResult = await db.rawQuery(query, [
+        periodFilter.beginDate.toIso8601String(),
+        periodFilter.endDate.toIso8601String()
+      ]);
+    } else {
+      queryResult = await db.rawQuery(query, [
+        periodFilter.beginDate.toIso8601String(),
+        periodFilter.endDate.toIso8601String(),
+        periodFilter.beginDate.toIso8601String(),
+        periodFilter.endDate.toIso8601String()
+      ]);
+    }
+
+    return Insight.fromMap(queryResult);
+  }
+
+  @override
+  Future<MyLineChartData> getLineChartData(
+      {required bool showIncomes, required bool showExpenses}) async {
+    var db = await _databaseHelper.database;
+
+    String filterWhere = "";
+
+    if (showIncomes && showExpenses) {
+      filterWhere = '''
+      WHERE (transactions.type_id = ${TransactionTypeExtension.toDatabase(TransactionType.EXPENSE)} 
+      OR transactions.type_id = ${TransactionTypeExtension.toDatabase(TransactionType.INCOME)})''';
+    } else if (showIncomes) {
+      filterWhere =
+          "WHERE transactions.type_id = ${TransactionTypeExtension.toDatabase(TransactionType.INCOME)}";
+    } else {
+      filterWhere =
+          "WHERE transactions.type_id = ${TransactionTypeExtension.toDatabase(TransactionType.EXPENSE)}";
+    }
+
+    // Ajustar a query para pegar o intervalo de todo o ano
+    String query = '''
+      SELECT SUM(transactions.value) as total,
+      strftime('%m', transactions.date) AS month
+      FROM transactions
+      $filterWhere
+      AND transactions.date >= ?
+      AND transactions.date <= ?
+      GROUP BY month
+      ORDER BY month
+    ''';
+
+    // Definir o intervalo de datas (do início ao fim do ano atual)
+    var result = await db.rawQuery(query, [
+      DateTime(DateTime.now().year, 1, 1).toIso8601String(), // Início do ano
+      DateTime(DateTime.now().year, 12, 31, 23, 59, 59)
+          .toIso8601String() // Fim do ano
+    ]);
+
+    MyLineChartData data =
+        MyLineChartData(minValue: 0, maxValue: 0, values: {});
+
+    result.forEach((el) {
+      int month = int.parse(el['month'] as String)-1;
+      double total = (el['total'] as num).toDouble();
+      data.values[month] = total;
+    });
+
+    // Encontrar o valor mínimo e máximo nos valores retornados
+    if (data.values.isNotEmpty) {
+      data.minValue = data.values.values.reduce((a, b) => a < b ? a : b);
+      data.maxValue = data.values.values.reduce((a, b) => a > b ? a : b);
+    }
+
+    return data;
+  }
+}

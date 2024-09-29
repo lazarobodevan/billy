@@ -23,11 +23,11 @@ class _ToggleTimeState extends State<ToggleTime> {
       onHorizontalDragEnd: (DragEndDetails details) {
         if (details.velocity.pixelsPerSecond.dx > 0) {
           // Arrastou para a direita
-          setSelected((selected + 1) % 3); // Aumenta e mantém no intervalo 0-2
+          setSelected((selected + 1) % 2); // Aumenta e mantém no intervalo 0-2
         } else if (details.velocity.pixelsPerSecond.dx < 0) {
           // Arrastou para a esquerda
           setSelected(
-              (selected - 1 + 3) % 3); // Diminui e mantém no intervalo 0-2
+              (selected - 1 + 2) % 2); // Diminui e mantém no intervalo 0-2
         }
       },
       child: Container(
@@ -37,6 +37,7 @@ class _ToggleTimeState extends State<ToggleTime> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            const SizedBox(width: 10,),
             GestureDetector(
               onTap: () {
                 setSelected(0);
@@ -46,7 +47,7 @@ class _ToggleTimeState extends State<ToggleTime> {
                 style: selected == 0
                     ? TypographyStyles.label1().copyWith(color: Colors.black)
                     : TypographyStyles.paragraph4().copyWith(color: Colors.grey),
-                child: const Text("Semana"),
+                child: const Text("Mês"),
               ),
             ),
             const SizedBox(width: 10,),
@@ -57,19 +58,6 @@ class _ToggleTimeState extends State<ToggleTime> {
               child: AnimatedDefaultTextStyle(
                 duration: const Duration(milliseconds: 100),
                 style: selected == 1
-                    ? TypographyStyles.label1().copyWith(color: Colors.black)
-                    : TypographyStyles.paragraph4().copyWith(color: Colors.grey),
-                child: const Text("Mês"),
-              ),
-            ),
-            const SizedBox(width: 10,),
-            GestureDetector(
-              onTap: () {
-                setSelected(2);
-              },
-              child: AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 100),
-                style: selected == 2
                     ? TypographyStyles.label1().copyWith(color: Colors.black)
                     : TypographyStyles.paragraph4().copyWith(color: Colors.grey),
                 child: const Text("Ano"),
