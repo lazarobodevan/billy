@@ -1,15 +1,16 @@
 import 'dart:convert';
-
 import 'package:billy/models/category/transaction_category.dart';
 import 'package:billy/models/insight/category_insight.dart';
 import 'package:billy/models/insight/line_chart_data.dart';
-import 'package:billy/presentation/screens/nav_pages/insights/components/line_chart/my_line_chart.dart';
+import 'package:billy/models/insight/subcategory_insight.dart';
+import 'package:billy/models/subcategory/subcategory.dart';
 import 'package:billy/utils/color_converter.dart';
 import 'package:billy/utils/icon_converter.dart';
 
 class Insight {
   double totalExpent;
   List<CategoryInsight> insightsByCategory;
+  List<SubcategoryInsight>? insightsBySubcategory;
   MyLineChartData lineChartData;
 
   Insight(
@@ -37,6 +38,26 @@ class Insight {
               icon:
                   IconConverter.parseIconFromDb(jsonDecode(el['group_icon']))),
           value: (el['total_value'] as num).toDouble()));
+    });
+
+    return insight;
+  }
+
+  static Insight fromMapSubcategory(List<Map<String, dynamic>> listMap) {
+    var insight = Insight.empty();
+    listMap.forEach((el) {
+      insight.totalExpent += (el["total_value"] as num).toDouble();
+      insight.insightsBySubcategory!.add(
+        SubcategoryInsight(
+          subcategory: Subcategory(
+            parentId: el["group_id"],
+            name: el["group_name"],
+            color: el["group_color"],
+            icon: IconConverter.parseIconFromDb(jsonDecode(el['group_icon'])),
+          ),
+          value: (el["group_value"] as num).toDouble(),
+        ),
+      );
     });
 
     return insight;

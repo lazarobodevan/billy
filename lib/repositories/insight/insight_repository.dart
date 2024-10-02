@@ -36,43 +36,48 @@ class InsightRepository extends IInsightRepository {
         GROUP BY categories.id, categories.name, categories.color, categories.icon
         '''
         : '''
-        -- Agrupamento por subcategoria
-        SELECT 
-          subcategories.id as group_id,
-          subcategories.name as group_name,
-          subcategories.color as group_color,
-          subcategories.icon as group_icon,
-          SUM(transactions.value) as total_value
+          -- Agrupamento por subcategoria
+          SELECT 
+            subcategories.category_id as parent_id,
+            subcategories.id as group_id,
+            subcategories.name as group_name,
+            subcategories.color as group_color,
+            subcategories.icon as group_icon,
+            categories.name as category_name,
+            categories.color as category_color,
+            SUM(transactions.value) as total_value
         FROM transactions
         LEFT JOIN categories ON transactions.category_id = categories.id
         LEFT JOIN subcategories ON transactions.subcategory_id = subcategories.id
-        WHERE transactions.type_id = ${TransactionTypeExtension.toDatabase(type!)}
+        WHERE transactions.type_id = 2
         AND subcategories.id IS NOT NULL
-        AND transactions.date >= ?
-        AND (transactions.end_date IS NULL OR transactions.end_date <= ?)
-        GROUP BY subcategories.id, subcategories.name, subcategories.color, subcategories.icon
-
+        AND categories.id = 2  -- Substitua :desired_category_id pelo ID da categoria desejada
+        GROUP BY subcategories.id, subcategories.name, subcategories.color, subcategories.icon, categories.name, categories.color
+        
         UNION ALL
-
+        
         -- Transações não especificadas (sem subcategoria)
         SELECT 
-          categories.id as group_id,
-          'Unspecified' as group_name,
-          categories.color as group_color,
-          categories.icon as group_icon,
-          SUM(transactions.value) - (
-            SELECT COALESCE(SUM(t2.value), 0)
-            FROM transactions t2
-            WHERE t2.category_id = categories.id
-            AND t2.subcategory_id IS NOT NULL
-          ) as total_value
+            NULL as parent_id,  -- Placeholder para manter o número de colunas
+            categories.id as group_id,
+            'Unspecified' as group_name,
+            categories.color as group_color,
+            categories.icon as group_icon,
+            categories.name as category_name,  -- Placeholder (valor real da categoria)
+            categories.color as category_color,  -- Placeholder para manter o número de colunas
+            SUM(transactions.value) - (
+                SELECT COALESCE(SUM(t2.value), 0)
+                FROM transactions t2
+                LEFT JOIN subcategories s2 ON t2.subcategory_id = s2.id
+                WHERE t2.category_id = categories.id
+                AND t2.subcategory_id IS NOT NULL
+            ) as total_value
         FROM transactions
         LEFT JOIN categories ON transactions.category_id = categories.id
-        WHERE transactions.type_id = ${TransactionTypeExtension.toDatabase(type!)}
+        WHERE transactions.type_id = 2
         AND transactions.subcategory_id IS NULL
-        AND transactions.date >= ?
-        AND (transactions.end_date IS NULL OR transactions.end_date <= ?)
-        GROUP BY categories.id, categories.name, categories.color, categories.icon
+        AND categories.id = 2  -- Substitua :desired_category_id pelo ID da categoria desejada
+        GROUP BY categories.id, categories.color, categories.icon, categories.name;
         ''';
 
     List<Map<String, Object?>> queryResult;
