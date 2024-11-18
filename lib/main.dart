@@ -9,10 +9,12 @@ import 'package:billy/repositories/category/category_repository.dart';
 import 'package:billy/repositories/database_helper.dart';
 import 'package:billy/repositories/subcategory/subcategory_repository.dart';
 import 'package:billy/repositories/transaction/transaction_repository.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
+import 'firebase_options.dart';
 import 'presentation/screens/transaction/add_transaction/add_transaction.dart';
 
 void main() async {
@@ -20,6 +22,7 @@ void main() async {
 
   await DatabaseHelper.instance.database;
   await initializeDateFormatting('pt_BR', null);
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(const MyApp());
 }

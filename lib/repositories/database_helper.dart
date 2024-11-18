@@ -1,12 +1,18 @@
+import 'dart:io';
+
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 class DatabaseHelper {
+
+  DatabaseHelper ();
+
   DatabaseHelper._privateConstructor();
 
   static final DatabaseHelper instance = DatabaseHelper._privateConstructor();
 
   static Database? _database;
+  static String _dbName = "my_database.db";
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -14,16 +20,46 @@ class DatabaseHelper {
     return _database!;
   }
 
-  Future<Database> _initDatabase() async {
+  getDbPath() async{
     final dbPath = await getDatabasesPath();
-    final path = join(dbPath, "my_database.db");
+    return join(dbPath, _dbName);
+  }
+
+  Future<Database> _initDatabase() async {
+    final dbPath = await getDbPath();
 
     final database = await openDatabase(
-      path,
+      dbPath,
       version: 1,
       onCreate: _onCreate,
     );
     return database;
+  }
+
+  Future<void> closeDatabase() async {
+    if (_database != null) {
+      await _database!.close();
+      _database = null;
+    }
+  }
+
+  Future<void> changeDatabaseName(String newDbName) async {
+    await closeDatabase();
+    _dbName = newDbName;
+    _database = await _initDatabase();
+  }
+
+  Future<void> restoreDatabaseFromFile(File backupFile) async {
+    final newDbPath = await getDbPath();
+
+    // Fechar o banco de dados atual
+    await closeDatabase();
+
+    // Copiar o arquivo de backup para o caminho do banco de dados
+    await backupFile.copy(newDbPath);
+
+    // Reabrir o banco de dados restaurado
+    _database = await _initDatabase();
   }
 
   Future<void> _onCreate(Database db, int version) async {

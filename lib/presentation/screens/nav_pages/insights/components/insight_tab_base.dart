@@ -13,7 +13,6 @@ import 'package:billy/presentation/screens/nav_pages/insights/enums/insight_tab.
 import 'package:billy/presentation/shared/components/toggle_time.dart';
 import 'package:billy/presentation/theme/colors.dart';
 import 'package:billy/presentation/theme/typography.dart';
-import 'package:billy/utils/date_utils.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -37,8 +36,8 @@ class InsightTabBase extends StatefulWidget {
   State<InsightTabBase> createState() => _InsightTabBaseState();
 }
 
-class _InsightTabBaseState extends State<InsightTabBase> with AutomaticKeepAliveClientMixin<InsightTabBase> {
-
+class _InsightTabBaseState extends State<InsightTabBase>
+    with AutomaticKeepAliveClientMixin<InsightTabBase> {
   @override
   void initState() {
     BlocProvider.of<InsightsBloc>(context).add(widget.getInsightEventInitial());
@@ -81,6 +80,13 @@ class _InsightTabBaseState extends State<InsightTabBase> with AutomaticKeepAlive
 
   double _getLineChartMaxValue(double maxValue) {
     return maxValue + 200;
+  }
+
+  bool _hasInsightData(InsightsBloc bloc) {
+    return (widget.tabEnum == InsightTabEnum.EXPENSE &&
+            bloc.expensesInsight.insightsByCategory.isNotEmpty) ||
+        (widget.tabEnum == InsightTabEnum.INCOME &&
+            bloc.incomeInsight.insightsByCategory.isNotEmpty);
   }
 
   @override
@@ -131,168 +137,11 @@ class _InsightTabBaseState extends State<InsightTabBase> with AutomaticKeepAlive
                   ),
                   child: Stack(
                     children: [
-                        Column(
-                          children: [
-                            const SizedBox(
-                              height: 18,
-                            ),
-                            AspectRatio(
-                              aspectRatio: 1.3,
-                              child: Stack(
-                                children: [
-                                  Align(
-                                    alignment: Alignment.center,
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Text(widget.pieChartText),
-                                        SizedBox(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              .35,
-                                          child: AutoSizeText(
-                                            "R\$${insight.totalExpent}",
-                                            style: TypographyStyles.headline3(),
-                                            textAlign: TextAlign.center,
-                                            maxLines: 1,
-                                            minFontSize: 22,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                  PieChart(
-                                    swapAnimationCurve: Curves.easeInCubic,
-                                    swapAnimationDuration:
-                                        const Duration(milliseconds: 700),
-                                    PieChartData(
-                                        sections: insight
-                                                .insightsByCategory.isNotEmpty
-                                            ? insight.insightsByCategory
-                                                .map(
-                                                  (el) => PieChartSectionData(
-                                                      color: el.category.color,
-                                                      value: el.value,
-                                                      title: "",
-                                                      badgeWidget: Container(
-                                                        width: 60,
-                                                        height: 25,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color: Colors.white,
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(10),
-                                                          boxShadow: const [
-                                                            BoxShadow(
-                                                                color: Colors
-                                                                    .black12,
-                                                                blurRadius: 2,
-                                                                spreadRadius: 2)
-                                                          ],
-                                                        ),
-                                                        child: Center(
-                                                          child: Text(
-                                                            _getPercentageAsText(
-                                                                el.value,
-                                                                insight
-                                                                    .totalExpent),
-                                                            textAlign: TextAlign
-                                                                .center,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      badgePositionPercentageOffset:
-                                                          1.2),
-                                                )
-                                                .toList()
-                                            : getPieChartMockedData()
-                                                .map(
-                                                  (el) => PieChartSectionData(
-                                                      color: el.color,
-                                                      value: el.value,
-                                                      title: "",
-                                                      badgeWidget: Container(
-                                                        width: 60,
-                                                        height: 25,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color: Colors.white,
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(10),
-                                                          boxShadow: const [
-                                                            BoxShadow(
-                                                                color: Colors
-                                                                    .black12,
-                                                                blurRadius: 2,
-                                                                spreadRadius: 2)
-                                                          ],
-                                                        ),
-                                                        child: Center(
-                                                          child: Text(
-                                                            el.title,
-                                                            textAlign: TextAlign
-                                                                .center,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      badgePositionPercentageOffset:
-                                                          1.2),
-                                                )
-                                                .toList()),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 16,
-                            ),
-                            ToggleTime(
-                              onSelect: (val) {
-                                bloc.add(
-                                  GetInsightEvent(
-                                    type:
-                                        widget.tabEnum == InsightTabEnum.EXPENSE
-                                            ? TransactionType.EXPENSE
-                                            : TransactionType.INCOME,
-                                    insightsTab: widget.tabEnum,
-                                    periodFilter: PeriodFilter(
-                                        beginDate: val.start, endDate: val.end),
-                                    groupByCategory: true,
-                                  ),
-                                );
-                              },
-                            ),
-                            const SizedBox(
-                              height: 16,
-                            )
-                          ],
-                        ),
-                      if ((widget.tabEnum == InsightTabEnum.EXPENSE &&
-                          bloc.expensesInsight.insightsByCategory
-                              .isEmpty) ||
-                          (widget.tabEnum == InsightTabEnum.INCOME &&
-                              bloc.incomeInsight.insightsByCategory
-                                  .isEmpty))
-                        ClipRRect(
-                          child: BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-                            child: Container(
-                              width: double.maxFinite,
-                              height: 300,
-                              decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(.9),
-                              ),
-                              child: Center(child: Text("Sem informações suficientes", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19),),),
-                            ),
-                          ),
-                        ),
+                      //Pie chart section
+                      _buildInsightPieChartSection(insight),
+
+                      // Not enough data
+                      if (!_hasInsightData(bloc)) _buildNotEnoughDataOverlay()
                     ],
                   ),
                 ),
@@ -330,6 +179,156 @@ class _InsightTabBaseState extends State<InsightTabBase> with AutomaticKeepAlive
           ],
         );
       }),
+    );
+  }
+
+  Widget _buildPieChart(Insight insight) {
+    return PieChart(
+      swapAnimationCurve: Curves.easeInCubic,
+      swapAnimationDuration: const Duration(milliseconds: 700),
+      PieChartData(
+        sections: insight.insightsByCategory.isNotEmpty
+            ? insight.insightsByCategory
+                .map(
+                  (el) => PieChartSectionData(
+                      color: el.category.color,
+                      value: el.value,
+                      title: "",
+                      badgeWidget: Container(
+                        width: 60,
+                        height: 25,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: const [
+                            BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 2,
+                                spreadRadius: 2)
+                          ],
+                        ),
+                        child: Center(
+                          child: Text(
+                            _getPercentageAsText(el.value, insight.totalExpent),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                      badgePositionPercentageOffset: 1.2),
+                )
+                .toList()
+            : getPieChartMockedData()
+                .map(
+                  (el) => PieChartSectionData(
+                      color: el.color,
+                      value: el.value,
+                      title: "",
+                      badgeWidget: Container(
+                        width: 60,
+                        height: 25,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: const [
+                            BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 2,
+                                spreadRadius: 2)
+                          ],
+                        ),
+                        child: Center(
+                          child: Text(
+                            el.title,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                      badgePositionPercentageOffset: 1.2),
+                )
+                .toList(),
+      ),
+    );
+  }
+
+  Widget _buildNotEnoughDataOverlay() {
+    return ClipRRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+        child: Container(
+          width: double.maxFinite,
+          height: 300,
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(.9),
+          ),
+          child: const Center(
+            child: Text(
+              "Sem informações suficientes",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInsightPieChartSection(Insight insight) {
+    var bloc = BlocProvider.of<InsightsBloc>(context);
+    return Column(
+      children: [
+        const SizedBox(
+          height: 18,
+        ),
+        AspectRatio(
+          aspectRatio: 1.3,
+          child: Stack(
+            children: [
+              Align(
+                alignment: Alignment.center,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(widget.pieChartText),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * .35,
+                      child: AutoSizeText(
+                        "R\$${insight.totalExpent}",
+                        style: TypographyStyles.headline3(),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        minFontSize: 22,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              _buildPieChart(insight)
+            ],
+          ),
+        ),
+        const SizedBox(
+          height: 16,
+        ),
+        ToggleTime(
+          onSelect: (val) {
+            bloc.add(
+              GetInsightEvent(
+                type: widget.tabEnum == InsightTabEnum.EXPENSE
+                    ? TransactionType.EXPENSE
+                    : TransactionType.INCOME,
+                insightsTab: widget.tabEnum,
+                periodFilter:
+                    PeriodFilter(beginDate: val.start, endDate: val.end),
+                groupByCategory: true,
+              ),
+            );
+          },
+        ),
+        const SizedBox(
+          height: 16,
+        )
+      ],
     );
   }
 }
