@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:billy/presentation/screens/nav_pages/home/widgets/draggable_transactions_container.dart';
 import 'package:billy/presentation/screens/transaction/bloc/transaction_bloc.dart';
+import 'package:billy/presentation/shared/blocs/google_auth_bloc/google_auth_bloc.dart';
 import 'package:billy/presentation/shared/components/action_button.dart';
 import 'package:billy/presentation/theme/colors.dart';
 import 'package:billy/presentation/theme/typography.dart';
@@ -115,6 +116,8 @@ class _HomeState extends State<Home> {
   }
 
   Widget _buildBalanceSection(LoadedHomeState state, bool isContainerHidden) {
+
+    var userName = BlocProvider.of<GoogleAuthBloc>(context).googleAuthService.currentUser?.displayName ?? "Alguém";
     return BlocListener<TransactionBloc, TransactionState>(
       listener: (context, state) {
         if (state is SavedTransactionToDatabaseState) {
@@ -154,7 +157,7 @@ class _HomeState extends State<Home> {
                         ),
                         const SizedBox(width: 10),
                         Text(
-                          "Lázaro Bodevan",
+                          userName,
                           style: TypographyStyles.label3(),
                         ),
                       ],

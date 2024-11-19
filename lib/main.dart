@@ -1,14 +1,18 @@
 import 'package:billy/models/transaction/transaction_model.dart';
+import 'package:billy/presentation/screens/backup_and_restore/bloc/drive_backup_bloc.dart';
+import 'package:billy/presentation/screens/balance_editor/bloc/balance_bloc.dart';
 import 'package:billy/presentation/screens/categories/category_bloc/category_bloc.dart';
 import 'package:billy/presentation/screens/categories/subcategory_bloc/subcategory_bloc.dart';
 import 'package:billy/presentation/screens/nav_pages/nav_page.dart';
 import 'package:billy/presentation/screens/transaction/bloc/transaction_bloc.dart';
 import 'package:billy/presentation/screens/transaction/transactions/bloc/list_transactions_bloc.dart';
+import 'package:billy/presentation/shared/blocs/google_auth_bloc/google_auth_bloc.dart';
 import 'package:billy/repositories/balance/balance_repository.dart';
 import 'package:billy/repositories/category/category_repository.dart';
 import 'package:billy/repositories/database_helper.dart';
 import 'package:billy/repositories/subcategory/subcategory_repository.dart';
 import 'package:billy/repositories/transaction/transaction_repository.dart';
+import 'package:billy/use_cases/google_drive/google_drive_backup_and_restore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -63,6 +67,16 @@ class MyApp extends StatelessWidget {
                 RepositoryProvider.of<TransactionRepository>(context),
           ),
         ),
+        BlocProvider(
+          create: (context) => DriveBackupBloc(
+            googleDriveBackupAndRestore: GoogleDriveBackupAndRestore(),
+          ),
+        ),
+        BlocProvider(create: (context) => GoogleAuthBloc()),
+        BlocProvider(
+            create: (context) => BalanceBloc(
+                balanceRepository:
+                    RepositoryProvider.of<BalanceRepository>(context)))
       ],
       child: MaterialApp(
         title: 'Flutter Demo',

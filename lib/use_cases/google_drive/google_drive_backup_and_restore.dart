@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:billy/interfaces/i_external_backup.dart';
+import 'package:billy/models/backup/backup_model.dart';
 import 'package:billy/repositories/database_helper.dart';
 import 'package:billy/services/google_drive_service/google_drive_service.dart';
 
@@ -26,10 +27,18 @@ class GoogleDriveBackupAndRestore implements IExternalBackup{
   }
 
   @override
-  Future<void> restoreDatabase() async{
+  Future<void> restoreDatabase(String database) async{
     final isAuthenticated = await googleDriveService.authenticate();
     if (isAuthenticated != null) {
       await googleDriveService.restoreDatabase('meu_banco.db');
+    }
+  }
+
+  @override
+  Future<List<BackupModel>?> listBackups() async{
+    final isAuthenticated = await googleDriveService.authenticate();
+    if (isAuthenticated != null) {
+      return await googleDriveService.listBackups();
     }
   }
 

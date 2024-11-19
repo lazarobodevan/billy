@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:billy/models/backup/backup_model.dart';
 import 'package:billy/services/auth_service/google_auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
@@ -110,6 +111,25 @@ class GoogleDriveService {
       }
     } catch (e) {
       debugPrint('Erro ao restaurar: $e');
+    }
+  }
+
+  Future<List<BackupModel>?> listBackups()async{
+    try{
+      final result = await _driveApi.files.list(
+          q: "name contains 'data_billy_' and trashed = false",
+          spaces: 'drive',
+          $fields: 'files(id, name, modifiedTime)',
+          orderBy: 'createdTime desc'
+      );
+      if(result.files != null && result.files!.isNotEmpty) {
+        return result.files!.map((el) {
+          return BackupModel(name: el.name!, date: el.modifiedTime!);
+        }).toList();
+      }
+      return null;
+    }catch(e){
+      debugPrint("Erro ao listar: $e");
     }
   }
 }

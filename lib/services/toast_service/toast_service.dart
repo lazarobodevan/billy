@@ -15,4 +15,25 @@ class ToastService{
     );
   }
 
+  static void showSuccess({String? message}){
+    Fluttertoast.showToast(
+      msg: message ?? "Sucesso!",
+      toastLength: Toast.LENGTH_LONG, // ou Toast.LENGTH_LONG
+      gravity: ToastGravity.BOTTOM,    // TOP, CENTER, BOTTOM
+      backgroundColor: ThemeColors.semanticGreen,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
+  }
+  static void showError({String? message}){
+    Fluttertoast.showToast(
+      msg: message ?? "Erro!",
+      toastLength: Toast.LENGTH_LONG, // ou Toast.LENGTH_LONG
+      gravity: ToastGravity.BOTTOM,    // TOP, CENTER, BOTTOM
+      backgroundColor: ThemeColors.semanticRed,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
+  }
+
 }

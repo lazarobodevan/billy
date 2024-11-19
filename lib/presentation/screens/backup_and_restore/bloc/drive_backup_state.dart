@@ -53,3 +53,25 @@ class RestoreErrorState extends DriveBackupState{
   @override
   List<Object?> get props => [];
 }
+
+class ListingBackupsState extends DriveBackupState{
+  @override
+  List<Object?> get props => [];
+}
+
+class ListedBackupsState extends DriveBackupState{
+  final List<BackupModel>? backups;
+
+  const ListedBackupsState({required this.backups});
+
+  @override
+  List<Object?> get props => [backups];
+}
+
+class ListingBackupsErrorState extends DriveBackupState{
+  final String message;
+
+  const ListingBackupsErrorState({required this.message});
+  @override
+  List<Object?> get props => [message];
+}

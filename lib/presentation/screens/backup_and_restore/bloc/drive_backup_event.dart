@@ -16,6 +16,15 @@ class BackupToDriveEvent extends DriveBackupEvent{
 }
 
 class RestoreFromDriveEvent extends DriveBackupEvent{
+  final String database;
+
+  const RestoreFromDriveEvent({required this.database});
+  @override
+  List<Object?> get props => [database];
+
+}
+
+class ListBackupsEvent extends DriveBackupEvent{
   @override
   List<Object?> get props => [];
 
