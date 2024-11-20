@@ -4,8 +4,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 class DatabaseHelper {
-
-  DatabaseHelper ();
+  DatabaseHelper();
 
   DatabaseHelper._privateConstructor();
 
@@ -20,7 +19,7 @@ class DatabaseHelper {
     return _database!;
   }
 
-  getDbPath() async{
+  getDbPath() async {
     final dbPath = await getDatabasesPath();
     return join(dbPath, _dbName);
   }
@@ -63,6 +62,20 @@ class DatabaseHelper {
   }
 
   Future<void> _onCreate(Database db, int version) async {
+
+    createTransactionsTable(db);
+    createCategoriesTable(db);
+    createSubcategoriesTable(db);
+    createBalanceTable(db);
+    createTransactionTypesTable(db);
+    createPaymentMethodsTable(db);
+    createGoalsTable(db);
+    createLimitsTable(db);
+
+    await insertDefaultValues(db);
+  }
+
+  Future<void> createTransactionsTable(Database db) async {
     db.execute('''
       CREATE TABLE transactions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -81,7 +94,9 @@ class DatabaseHelper {
         FOREIGN KEY (subcategory_id) REFERENCES subcategories(id)
       );
     ''');
+  }
 
+  Future<void> createCategoriesTable(Database db) async {
     db.execute('''
       CREATE TABLE categories (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -91,7 +106,9 @@ class DatabaseHelper {
         color INT
       );
     ''');
+  }
 
+  Future<void> createSubcategoriesTable(Database db) async {
     db.execute('''
       CREATE TABLE subcategories (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -103,7 +120,9 @@ class DatabaseHelper {
         FOREIGN KEY (category_id) REFERENCES categories(id)
       );
     ''');
+  }
 
+  Future<void> createBalanceTable(Database db) async {
     db.execute('''
       CREATE TABLE balance (
         credit_limit REAL DEFAULT 0,
@@ -111,21 +130,58 @@ class DatabaseHelper {
         balance REAL DEFAULT 0
       );
     ''');
+  }
 
+  Future<void> createTransactionTypesTable(Database db) async{
     db.execute('''
       CREATE TABLE transaction_types (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL
       );
     ''');
+  }
 
+  Future<void> createPaymentMethodsTable(Database db) async{
     db.execute('''
       CREATE TABLE payment_methods (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL
       );
     ''');
+  }
 
+  Future<void> createGoalsTable(Database db) async{
+    db.execute('''
+      CREATE TABLE goals(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        target_value REAL NOT NULL,
+        current_value REAL NOT NULL,
+        target_date TEXT
+      );
+    ''');
+  }
+
+  Future<void> createLimitsTable(Database db) async{
+    db.execute('''
+      CREATE TABLE limits(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        category_id INTEGER,
+        subcategory_id INTEGER,
+        payment_method_id INTEGER,
+        transaction_type_id INTEGER,
+        max_value REAL NOT NULL,
+        recurrent INTEGER,
+        
+        FOREIGN KEY (category_id) REFERENCES categories(id),
+        FOREIGN KEY (subcategory_id) REFERENCES subcategories(id),
+        FOREIGN KEY (payment_method_id) REFERENCES payment_methods(id),
+        FOREIGN KEY (transaction_type_id) REFERENCES transaction_types(id)
+      );
+    ''');
+  }
+
+  Future<void> insertDefaultValues(Database db) async {
     //DEFAULT TRANSACTION TYPES
     await db.insert('transaction_types', {'name': 'INCOME'});
     await db.insert('transaction_types', {'name': 'EXPENSE'});
@@ -137,6 +193,7 @@ class DatabaseHelper {
     await db.insert('payment_methods', {'name': 'MONEY'});
 
     //DEFAULT BALANCE
-    await db.insert('balance', {'credit_limit':0, 'credit_limit_used':0, 'balance':0});
+    await db.insert(
+        'balance', {'credit_limit': 0, 'credit_limit_used': 0, 'balance': 0});
   }
 }
