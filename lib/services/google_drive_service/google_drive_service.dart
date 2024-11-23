@@ -76,7 +76,7 @@ class GoogleDriveService {
     }
   }
 
-  Future<void> restoreDatabase(String dbName) async {
+  Future<File?> restoreDatabase(String dbName) async {
     try {
       // Procurar pelo arquivo de backup no Google Drive
       final result = await _driveApi.files.list(
@@ -102,16 +102,19 @@ class GoogleDriveService {
 
           final dataStream = driveFile as drive.Media;
           final bytes = await dataStream.stream.toList();
-          await localFile.writeAsBytes(bytes.expand((x) => x).toList());
+          File db = await localFile.writeAsBytes(bytes.expand((x) => x).toList());
 
           debugPrint('Banco de dados restaurado com sucesso do arquivo: ${mostRecentFile.name}');
+          return db;
         }
       } else {
         debugPrint('Nenhum arquivo de backup encontrado no Google Drive.');
       }
     } catch (e) {
       debugPrint('Erro ao restaurar: $e');
+      rethrow;
     }
+    return null;
   }
 
   Future<List<BackupModel>?> listBackups()async{

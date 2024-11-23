@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:billy/models/subcategory/subcategory.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,13 +20,14 @@ class CategoryEditorDialog {
     int? parentId = -1,
   }) {
     final isUpdate = category != null && category.id != null;
+    final randomColor = Colors.primaries[Random().nextInt(Colors.primaries.length)];
 
     TextEditingController _nameController = TextEditingController(
       text: isUpdate ? category.name : "",
     );
 
     Color _selectedColor =
-        isUpdate ? category.color : Colors.grey; // Default color
+        isUpdate ? category.color : randomColor; // Default color
     IconData _selectedIcon =
         isUpdate ? category.icon : Icons.category; // Default icon
 
@@ -96,7 +99,7 @@ class CategoryEditorDialog {
                         height: 16,
                       ),
                       ColorPickerButton(
-                        initalColor: isUpdate ? category.color : null,
+                        initalColor: isUpdate ? category.color : randomColor,
                         onColorChanged: onChangedColor,
                       ),
                       const SizedBox(

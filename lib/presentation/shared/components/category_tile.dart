@@ -16,7 +16,10 @@ class CategoryTile extends StatefulWidget {
   final TransactionCategory category;
 
   const CategoryTile(
-      {super.key, required this.category, this.isClickable = true, required this.onSelectCategory});
+      {super.key,
+      required this.category,
+      this.isClickable = true,
+      required this.onSelectCategory});
 
   @override
   State<CategoryTile> createState() => _CategoryTileState();
@@ -208,12 +211,13 @@ class _CategoryTileState extends State<CategoryTile> {
                                 ...widget.category.subcategories!.map((subcat) {
                                   return Material(
                                     child: InkWell(
-                                      onTap: (){
-                                        if(widget.isClickable == false) return;
+                                      onTap: () {
+                                        if (widget.isClickable == false) return;
                                         onSelectCategory(subcategory: subcat);
                                       },
                                       child: Ink(
-                                        padding: const EdgeInsets.only(bottom: 10),
+                                        padding:
+                                            const EdgeInsets.only(bottom: 10),
                                         child: Row(
                                           children: [
                                             Container(

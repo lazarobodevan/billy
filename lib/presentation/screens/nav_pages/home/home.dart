@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:billy/presentation/screens/nav_pages/home/widgets/draggable_transactions_container.dart';
@@ -50,91 +51,38 @@ class _HomeState extends State<Home> {
     return Scaffold(
       backgroundColor: ThemeColors.primary2,
       body: SafeArea(
-        child: Stack(
-          children: [
-            AnimatedPositioned(
-              duration: Duration(milliseconds: 500),
-              curve: Curves.decelerate,
-              top: isContainerHidden
-                  ? MediaQuery.of(context).size.height / 5
-                  : 0,
-              left: 0,
-              right: 0,
-              child: BlocBuilder<HomeBloc, HomeState>(
-                builder: (context, state) {
-                  if (state is LoadingHomeState) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (state is LoadedHomeState) {
-                    return _buildBalanceSection(state, isContainerHidden);
-                  }
-                  return SizedBox();
-                },
-              ),
-            ),
-            if (!isContainerHidden)
-              AnimatedPositioned(
-                duration: Duration(milliseconds: 500),
-                bottom:
-                    isContainerHidden ? -MediaQuery.of(context).size.height : 0,
-                left: 0,
-                right: 0,
-                child: SizedBox(
-                  height: MediaQuery.of(context).size.height / 2,
-                  child: DraggableTransactionsContainer(
-                    onHide: toggleContainerVisibility,
-                    onSizeChanged: updateChildSize,
-                  ),
-                ),
-              )
-            else
-              Positioned(
-                  bottom: 40,
-                  left: MediaQuery.of(context).size.width / 2 - 30,
-                  child: InkWell(
-                    onTap: () {
-                      toggleContainerVisibility();
-                    },
-                    child: Ink(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                          border: Border.all(color: ThemeColors.primary1),
-                          borderRadius: BorderRadius.circular(60)),
-                      child: const Center(
-                        child: Icon(
-                          Icons.keyboard_arrow_up_rounded,
-                          size: 40,
-                        ),
-                      ),
-                    ),
-                  ))
-          ],
+        child: BlocBuilder<HomeBloc, HomeState>(
+          builder: (context, state) {
+            if (state is LoadingHomeState) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (state is LoadedHomeState) {
+              return _buildBalanceSection(state, isContainerHidden);
+            }
+            return SizedBox();
+          },
         ),
       ),
     );
   }
 
   Widget _buildBalanceSection(LoadedHomeState state, bool isContainerHidden) {
+    var loggedUser =
+        BlocProvider.of<GoogleAuthBloc>(context).googleAuthService.currentUser;
 
-    var userName = BlocProvider.of<GoogleAuthBloc>(context).googleAuthService.currentUser?.displayName ?? "Alguém";
+    _getProfilePicture() {
+      if (loggedUser != null && loggedUser.photoURL != null) {
+        return loggedUser.photoURL;
+      }
+      return null;
+    }
+
     return BlocListener<TransactionBloc, TransactionState>(
-      listener: (context, state) {
-        if (state is SavedTransactionToDatabaseState) {
-          BlocProvider.of<HomeBloc>(context).add(LoadHomeEvent());
-        }
-      },
-      child: AnimatedContainer(
-        duration: Duration(milliseconds: 500),
-        curve: Curves.ease,
-        decoration: BoxDecoration(
-            gradient: isContainerHidden
-                ? LinearGradient(
-                    colors: [Color(0xfffbd07c), Color(0xfff7f779)],
-                    end: Alignment.bottomRight,
-                    begin: Alignment.topLeft)
-                : null,
-            borderRadius: BorderRadius.circular(16)),
+        listener: (context, state) {
+          if (state is SavedTransactionToDatabaseState) {
+            BlocProvider.of<HomeBloc>(context).add(LoadHomeEvent());
+          }
+        },
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Material(
@@ -154,10 +102,13 @@ class _HomeState extends State<Home> {
                             borderRadius: BorderRadius.circular(50),
                             color: ThemeColors.primary1,
                           ),
+                          child: _getProfilePicture() != null
+                              ? Image.network(_getProfilePicture()!)
+                              : SizedBox(),
                         ),
                         const SizedBox(width: 10),
                         Text(
-                          userName,
+                          loggedUser?.displayName ?? "Você",
                           style: TypographyStyles.label3(),
                         ),
                       ],
@@ -253,9 +204,7 @@ class _HomeState extends State<Home> {
               ],
             ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 
   double getCreditLimitWidth(

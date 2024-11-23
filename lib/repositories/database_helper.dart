@@ -166,17 +166,10 @@ class DatabaseHelper {
     db.execute('''
       CREATE TABLE limits(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        category_id INTEGER,
-        subcategory_id INTEGER,
-        payment_method_id INTEGER,
-        transaction_type_id INTEGER,
         max_value REAL NOT NULL,
         recurrent INTEGER,
-        
-        FOREIGN KEY (category_id) REFERENCES categories(id),
-        FOREIGN KEY (subcategory_id) REFERENCES subcategories(id),
-        FOREIGN KEY (payment_method_id) REFERENCES payment_methods(id),
-        FOREIGN KEY (transaction_type_id) REFERENCES transaction_types(id)
+        limit_target_name TEXT,
+        limit_target_id INTEGER
       );
     ''');
   }

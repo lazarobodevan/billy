@@ -8,11 +8,11 @@ import 'package:billy/services/google_drive_service/google_drive_service.dart';
 class GoogleDriveBackupAndRestore implements IExternalBackup{
 
   final GoogleDriveService googleDriveService = GoogleDriveService();
+  final DatabaseHelper dbHelper = DatabaseHelper();
 
   @override
   Future<void> backupDatabase() async{
     try {
-      final dbHelper = DatabaseHelper();
       final dbDir = await dbHelper.getDbPath();
       final dbFile = File(dbDir);
 
@@ -30,7 +30,10 @@ class GoogleDriveBackupAndRestore implements IExternalBackup{
   Future<void> restoreDatabase(String database) async{
     final isAuthenticated = await googleDriveService.authenticate();
     if (isAuthenticated != null) {
-      await googleDriveService.restoreDatabase('meu_banco.db');
+      File? db = await googleDriveService.restoreDatabase(database);
+      if(db != null){
+        await dbHelper.restoreDatabaseFromFile(db);
+      }
     }
   }
 
