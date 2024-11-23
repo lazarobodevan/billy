@@ -60,6 +60,16 @@ class More extends StatelessWidget {
                 height: 20,
               ),
               MoreItem(
+                  text: "Editar conta bancária",
+                  icon: Icons.edit_outlined,
+                  onClick: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => BalanceEditor()));
+                  }),
+              const SizedBox(
+                height: 20,
+              ),
+              MoreItem(
                 text: "Backup e restauração",
                 icon: Icons.cloud_sync_outlined,
                 onClick: () {
@@ -67,16 +77,6 @@ class More extends StatelessWidget {
                       builder: (context) => BackupAndRestoreScreen()));
                 },
               ),
-              const SizedBox(
-                height: 20,
-              ),
-              MoreItem(
-                  text: "Editar conta bancária",
-                  icon: Icons.edit_outlined,
-                  onClick: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => BalanceEditor()));
-                  })
             ],
           ),
         ),

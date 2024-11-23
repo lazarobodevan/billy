@@ -41,8 +41,12 @@ class SavingCategoryToDatabase extends CategoryState{
 }
 
 class SaveCategoryToDatabaseErrorState extends CategoryState{
+  final String message;
+
+  const SaveCategoryToDatabaseErrorState({required this.message});
+
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [message];
 
 }
 

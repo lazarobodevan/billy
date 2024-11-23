@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:billy/models/transaction/transaction_model.dart';
+import 'package:billy/repositories/balance/balance_repository.dart';
 import 'package:billy/repositories/transaction/i_transaction_repository.dart';
 import 'package:billy/use_cases/transaction/delete_transaction_use_case.dart';
 import 'package:billy/use_cases/transaction/get_all_transactions_use_case.dart';
@@ -15,6 +16,7 @@ part 'list_transactions_state.dart';
 class ListTransactionsBloc extends Bloc<ListTransactionsEvent, ListTransactionsState> {
 
   final ITransactionRepository transactionRepository;
+  late final BalanceRepository balanceRepository;
   late final GetAvailablePeriodsUseCase getAvailablePeriodsUseCase;
   late final GetAllTransactionsUseCase getAllTransactionsUseCase;
   late final ListTransactionsByDateUseCase listTransactionsByDateUseCase;
@@ -23,11 +25,11 @@ class ListTransactionsBloc extends Bloc<ListTransactionsEvent, ListTransactionsS
   late List<String> periods;
   late Map<DateTime,List<Transaction>> transactions;
 
-  ListTransactionsBloc({required this.transactionRepository}) : super(ListTransactionsInitial()) {
+  ListTransactionsBloc({required this.transactionRepository, required this.balanceRepository}) : super(ListTransactionsInitial()) {
 
     getAllTransactionsUseCase = GetAllTransactionsUseCase(transactionRepository: transactionRepository);
     getAvailablePeriodsUseCase = GetAvailablePeriodsUseCase(transactionRepository: transactionRepository);
-    deleteTransactionUseCase = DeleteTransactionUseCase(transactionRepository: transactionRepository);
+    deleteTransactionUseCase = DeleteTransactionUseCase(transactionRepository: transactionRepository, balanceRepository: balanceRepository);
     listTransactionsByDateUseCase = ListTransactionsByDateUseCase(transactionRepository: transactionRepository);
 
     periods = [];

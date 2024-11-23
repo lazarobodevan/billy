@@ -65,6 +65,7 @@ class MyApp extends StatelessWidget {
           create: (context) => ListTransactionsBloc(
             transactionRepository:
                 RepositoryProvider.of<TransactionRepository>(context),
+            balanceRepository: RepositoryProvider.of<BalanceRepository>(context)
           ),
         ),
         BlocProvider(

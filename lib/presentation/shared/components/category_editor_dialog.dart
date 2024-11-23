@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:billy/models/subcategory/subcategory.dart';
+import 'package:billy/services/toast_service/toast_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,7 +21,8 @@ class CategoryEditorDialog {
     int? parentId = -1,
   }) {
     final isUpdate = category != null && category.id != null;
-    final randomColor = Colors.primaries[Random().nextInt(Colors.primaries.length)];
+    final randomColor =
+        Colors.primaries[Random().nextInt(Colors.primaries.length)];
 
     TextEditingController _nameController = TextEditingController(
       text: isUpdate ? category.name : "",
@@ -73,73 +75,81 @@ class CategoryEditorDialog {
     showDialog(
         context: context,
         builder: (BuildContext context) {
-          return BlocBuilder<CategoryBloc, CategoryState>(
-            builder: (context, state) {
-              return AlertDialog(
-                title: isCategory == true
-                    ? Text(
-                        "Categoria",
-                        style: TypographyStyles.label1(),
-                      )
-                    : Text(
-                        "Subcategoria",
-                        style: TypographyStyles.label1(),
-                      ),
-                content: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      TextField(
-                        controller: _nameController,
-                        decoration: InputDecoration(hintText: "Nome"),
-                        maxLengthEnforcement:
-                            MaxLengthEnforcement.truncateAfterCompositionEnds,
-                        maxLength: 20,
-                      ),
-                      const SizedBox(
-                        height: 16,
-                      ),
-                      ColorPickerButton(
-                        initalColor: isUpdate ? category.color : randomColor,
-                        onColorChanged: onChangedColor,
-                      ),
-                      const SizedBox(
-                        height: 16,
-                      ),
-                      IconPickerButton(
-                        initialIcon: isUpdate ? category.icon : null,
-                        onChangedIcon: onChangedIcon,
-                      ),
-                    ],
-                  ),
-                ),
-                actionsAlignment: MainAxisAlignment.spaceBetween,
-                actions: [
-                  TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: Text("Cancelar")),
-                  TextButton(
-                      onPressed: () {
-                        if (isCategory == true) {
-                          if (!isUpdate) {
-                            onSaveCategoryToDatabase();
-                            Navigator.of(context).pop();
-                          } else {
-                            onUpdateCategoryToDatabase();
-                            Navigator.of(context).pop();
-                          }
-                        } else {
-                          if (!isUpdate) {
-                            onSaveSubcategoryToDatabase();
-                            Navigator.of(context).pop();
-                          }
-                        }
-                      },
-                      child: Text(isUpdate ? "Atualizar" : "Confirmar")),
-                ],
-              );
+          return BlocListener<CategoryBloc, CategoryState>(
+            listener: (context, state) {
+              if (state is SavedCategoryToDatabase ||
+                  state is SavedSubcategoryToDatabaseState ||
+                  state is LoadedCategoriesState) {
+                ToastService.showSuccess(
+                    message: "Categoria criada com sucesso!");
+                Navigator.of(context).pop();
+              }
             },
+            child: BlocBuilder<CategoryBloc, CategoryState>(
+              builder: (context, state) {
+                return AlertDialog(
+                  title: isCategory == true
+                      ? Text(
+                          "Categoria",
+                          style: TypographyStyles.label1(),
+                        )
+                      : Text(
+                          "Subcategoria",
+                          style: TypographyStyles.label1(),
+                        ),
+                  content: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        TextField(
+                          controller: _nameController,
+                          decoration: InputDecoration(hintText: "Nome"),
+                          maxLengthEnforcement:
+                              MaxLengthEnforcement.truncateAfterCompositionEnds,
+                          maxLength: 20,
+                        ),
+                        const SizedBox(
+                          height: 16,
+                        ),
+                        ColorPickerButton(
+                          initalColor: isUpdate ? category.color : randomColor,
+                          onColorChanged: onChangedColor,
+                        ),
+                        const SizedBox(
+                          height: 16,
+                        ),
+                        IconPickerButton(
+                          initialIcon: isUpdate ? category.icon : null,
+                          onChangedIcon: onChangedIcon,
+                        ),
+                      ],
+                    ),
+                  ),
+                  actionsAlignment: MainAxisAlignment.spaceBetween,
+                  actions: [
+                    TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: Text("Cancelar")),
+                    TextButton(
+                        onPressed: () {
+                          if (isCategory == true) {
+                            if (!isUpdate) {
+                              onSaveCategoryToDatabase();
+                            } else {
+                              onUpdateCategoryToDatabase();
+                            }
+                          } else {
+                            if (!isUpdate) {
+                              onSaveSubcategoryToDatabase();
+                            }
+                          }
+                        },
+                        child: Text(isUpdate ? "Atualizar" : "Confirmar")),
+                  ],
+                );
+              },
+            ),
           );
         });
   }

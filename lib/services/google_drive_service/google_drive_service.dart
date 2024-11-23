@@ -23,20 +23,22 @@ class GoogleDriveService {
   Future<http.Client?> authenticate() async {
     try {
       // Tenta fazer login silencioso primeiro
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signInSilently() ??
-          await _googleSignIn.signIn();
+      final GoogleSignInAccount? googleUser =
+          await _googleSignIn.signInSilently() ?? await _googleSignIn.signIn();
 
       print(googleUser);
 
       if (googleUser == null) return null;
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
       // Cria um cliente autenticado
       final AuthClient authClient = authenticatedClient(
         http.Client(),
         AccessCredentials(
-          AccessToken('Bearer', googleAuth.accessToken!, DateTime.now().add(Duration(hours: 1)).toUtc()),
+          AccessToken('Bearer', googleAuth.accessToken!,
+              DateTime.now().add(Duration(hours: 1)).toUtc()),
           googleAuth.idToken,
           [drive.DriveApi.driveFileScope],
         ),
@@ -58,13 +60,17 @@ class GoogleDriveService {
 
   Future<void> backupDatabase(File dbFile) async {
     try {
-
-      final timestamp = DateFormat('yyyy-MM-dd_HH-mm-ss').format(DateTime.now());
+      final timestamp =
+          DateFormat('yyyy-MM-dd_HH-mm-ss').format(DateTime.now());
       final backupFileName = 'data_billy_$timestamp.db';
+
+      String folderId = await _getOrCreateBackupFolder();
+
 
       final drive.File driveFile = drive.File();
       driveFile.name = backupFileName;
       driveFile.mimeType = 'application/x-sqlite3';
+      driveFile.parents = [folderId];
 
       await _driveApi.files.create(
         driveFile,
@@ -76,15 +82,47 @@ class GoogleDriveService {
     }
   }
 
+  Future<String> _getOrCreateBackupFolder() async {
+    try {
+      const folderName = 'billy_backups';
+      const mimeTypeFolder = 'application/vnd.google-apps.folder';
+
+      // Procurar uma pasta com o nome 'billy_backups'
+      const query =
+          "mimeType='$mimeTypeFolder' and name='$folderName' and trashed=false";
+      final response = await _driveApi.files.list(q: query);
+
+      if (response.files != null && response.files!.isNotEmpty) {
+        return response.files!.first.id!;
+      }
+
+      // Caso a pasta não exista, criar uma nova
+      final drive.File folder = drive.File();
+      folder.name = folderName;
+      folder.mimeType = mimeTypeFolder;
+
+      final createdFolder = await _driveApi.files.create(folder);
+      debugPrint('Pasta billy_backups criada no Google Drive.');
+
+      return createdFolder.id!;
+    } catch (e) {
+      debugPrint('Erro ao obter ou criar a pasta billy_backups: $e');
+      throw Exception(
+          'Não foi possível encontrar ou criar a pasta billy_backups.');
+    }
+  }
+
   Future<File?> restoreDatabase(String dbName) async {
     try {
+
+      String folderId = await _getOrCreateBackupFolder();
+
       // Procurar pelo arquivo de backup no Google Drive
       final result = await _driveApi.files.list(
-        q: "name contains 'data_billy_'",
-        spaces: 'drive',
-        $fields: 'files(id, name)',
-        orderBy: 'createdTime desc'
-      );
+          q: "'$folderId' in parents and name contains 'data_billy_'",
+          spaces: 'drive',
+          $fields: 'files(id, name, modifiedTime)',
+          orderBy: 'createdTime desc');
 
       if (result.files != null && result.files!.isNotEmpty) {
         final mostRecentFile = result.files!.first;
@@ -102,9 +140,11 @@ class GoogleDriveService {
 
           final dataStream = driveFile as drive.Media;
           final bytes = await dataStream.stream.toList();
-          File db = await localFile.writeAsBytes(bytes.expand((x) => x).toList());
+          File db =
+              await localFile.writeAsBytes(bytes.expand((x) => x).toList());
 
-          debugPrint('Banco de dados restaurado com sucesso do arquivo: ${mostRecentFile.name}');
+          debugPrint(
+              'Banco de dados restaurado com sucesso do arquivo: ${mostRecentFile.name}');
           return db;
         }
       } else {
@@ -117,22 +157,25 @@ class GoogleDriveService {
     return null;
   }
 
-  Future<List<BackupModel>?> listBackups()async{
-    try{
+  Future<List<BackupModel>?> listBackups() async {
+    try {
+      String folderId = await _getOrCreateBackupFolder();
+
+      // Procurar pelo arquivo de backup no Google Drive
       final result = await _driveApi.files.list(
-          q: "name contains 'data_billy_' and trashed = false",
+          q: "'$folderId' in parents and name contains 'data_billy_'",
           spaces: 'drive',
           $fields: 'files(id, name, modifiedTime)',
-          orderBy: 'createdTime desc'
-      );
-      if(result.files != null && result.files!.isNotEmpty) {
+          orderBy: 'createdTime desc');
+      if (result.files != null && result.files!.isNotEmpty) {
         return result.files!.map((el) {
           return BackupModel(name: el.name!, date: el.modifiedTime!);
         }).toList();
       }
       return null;
-    }catch(e){
+    } catch (e) {
       debugPrint("Erro ao listar: $e");
+      rethrow;
     }
   }
 }
