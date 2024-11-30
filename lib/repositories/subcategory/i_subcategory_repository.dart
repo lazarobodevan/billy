@@ -7,4 +7,5 @@ abstract class ISubcategoryRepository{
   Future<Subcategory?> getById(int id);
   Future<void> delete(int id);
   Future<Subcategory> update(Subcategory category);
+  Future<List<Subcategory>> getAll();
 }

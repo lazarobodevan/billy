@@ -1,12 +1,11 @@
 import 'package:billy/presentation/screens/backup_and_restore/backup_and_restore_screen.dart';
 import 'package:billy/presentation/screens/balance_editor/balance_editor.dart';
 import 'package:billy/presentation/screens/categories/categories.dart';
+import 'package:billy/presentation/screens/limits/limits_screen.dart';
 import 'package:billy/presentation/screens/nav_pages/more/widgets/more_item.dart';
 import 'package:billy/presentation/theme/colors.dart';
 import 'package:billy/services/auth_service/google_auth_service.dart';
-import 'package:billy/use_cases/google_drive/google_drive_backup_and_restore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class More extends StatelessWidget {
   const More({super.key});
@@ -54,6 +53,17 @@ class More extends StatelessWidget {
                       isSelectableCategories: false,
                     ),
                   ));
+                },
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              MoreItem(
+                text: "Limites",
+                icon: Icons.percent_rounded,
+                onClick: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => LimitsScreen()));
                 },
               ),
               const SizedBox(

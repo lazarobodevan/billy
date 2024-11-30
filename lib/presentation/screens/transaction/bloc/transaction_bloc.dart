@@ -69,11 +69,12 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     });
 
     on<ResetTransaction>((event, emit){
+      emit(TransactionInitial());
       amountInCents = 0;
       transaction = Transaction.empty();
       periods = [];
       transactions = [];
-      emit(TransactionInitial());
+      emit(AddTransactionInitial());
     });
 
     on<EraseValue>((event, emit) {

@@ -55,10 +55,29 @@ class TransactionCategory {
   static TransactionCategory fromMap(Map<String, dynamic> map) {
     return TransactionCategory(
       id: map['category_id'] ?? map['id'],
-      name: map['category_name']?? map['name'],
-      color: ColorConverter.intToColor(map['category_color'] ?? map['color']),
-      icon: IconConverter.parseIconFromDb(jsonDecode(map['category_icon'] ?? map['icon'])),
-      subcategories: map['subcategory_id'] != null ? [Subcategory.fromMap(map)] : [],
+      name: map['category_name'] ?? map['name'],
+      color: _getColor(map),
+      icon: _getIcon(map),
+      subcategories:
+          map['subcategory_id'] != null ? [Subcategory.fromMap(map)] : [],
     );
+  }
+
+  static _getColor(Map<String, dynamic> map) {
+    if (map['category_color'] != null) {
+      return ColorConverter.intToColor(map['category_color']);
+    } else if (map['color'] != null) {
+      return map['color'];
+    }
+    return Colors.orange;
+  }
+
+  static _getIcon(Map<String, dynamic> map) {
+    if (map['category_icon'] != null) {
+      return IconConverter.parseIconFromDb(jsonDecode(map['category_icon']));
+    } else if (map['icon'] != null) {
+      return map['icon'];
+    }
+    return Icons.question_mark;
   }
 }

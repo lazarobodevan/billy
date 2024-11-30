@@ -16,4 +16,17 @@ extension TransactionTypeExtension on TransactionType{
     if(type == TransactionType.EXPENSE) return 2;
     return 3;
   }
+
+  static TransactionType fromIndex(int index){
+    switch (index) {
+      case 1:
+        return TransactionType.INCOME;
+      case 2:
+        return TransactionType.EXPENSE;
+      case 3:
+        return TransactionType.TRANSFER;
+      default:
+        throw ArgumentError('Invalid index for TransactionType: $index');
+    }
+  }
 }

@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 class DatePicker extends StatefulWidget {
   DateTime? initialDate;
   String? label;
-  Function onSelect;
+  Function(DateTime) onSelect;
 
   DatePicker({this.label, this.initialDate, required this.onSelect, super.key});
 
@@ -34,7 +34,7 @@ class _DatePickerState extends State<DatePicker> {
     ).then((value) {
       setState(() {
         _dateTime = value!;
-        widget.onSelect(_dateTime);
+        widget.onSelect(_dateTime!);
       });
     });
   }
@@ -56,7 +56,7 @@ class _DatePickerState extends State<DatePicker> {
             children: [
               Text(
                 widget.label!,
-                style: TypographyStyles.label2(),
+                style: TypographyStyles.label3(),
               ),
               InkWell(
                 onTap: _resetDateTime,

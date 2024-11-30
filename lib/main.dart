@@ -3,6 +3,8 @@ import 'package:billy/presentation/screens/backup_and_restore/bloc/drive_backup_
 import 'package:billy/presentation/screens/balance_editor/bloc/balance_bloc.dart';
 import 'package:billy/presentation/screens/categories/category_bloc/category_bloc.dart';
 import 'package:billy/presentation/screens/categories/subcategory_bloc/subcategory_bloc.dart';
+import 'package:billy/presentation/screens/limits/bloc/limits_bloc.dart';
+import 'package:billy/presentation/screens/limits/limit_editor/widgets/limit_picker/bloc/limit_picker_bloc.dart';
 import 'package:billy/presentation/screens/nav_pages/nav_page.dart';
 import 'package:billy/presentation/screens/transaction/bloc/transaction_bloc.dart';
 import 'package:billy/presentation/screens/transaction/transactions/bloc/list_transactions_bloc.dart';
@@ -10,6 +12,8 @@ import 'package:billy/presentation/shared/blocs/google_auth_bloc/google_auth_blo
 import 'package:billy/repositories/balance/balance_repository.dart';
 import 'package:billy/repositories/category/category_repository.dart';
 import 'package:billy/repositories/database_helper.dart';
+import 'package:billy/repositories/limit/i_limit_repository.dart';
+import 'package:billy/repositories/limit/limit_repository.dart';
 import 'package:billy/repositories/subcategory/subcategory_repository.dart';
 import 'package:billy/repositories/transaction/transaction_repository.dart';
 import 'package:billy/use_cases/google_drive/google_drive_backup_and_restore.dart';
@@ -43,6 +47,7 @@ class MyApp extends StatelessWidget {
         RepositoryProvider(create: (context) => CategoryRepository()),
         RepositoryProvider(create: (context) => SubcategoryRepository()),
         RepositoryProvider(create: (context) => BalanceRepository()),
+        RepositoryProvider(create: (context) => LimitRepository()),
         BlocProvider(
           create: (context) => TransactionBloc(
               transactionRepository:
@@ -63,10 +68,10 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => ListTransactionsBloc(
-            transactionRepository:
-                RepositoryProvider.of<TransactionRepository>(context),
-            balanceRepository: RepositoryProvider.of<BalanceRepository>(context)
-          ),
+              transactionRepository:
+                  RepositoryProvider.of<TransactionRepository>(context),
+              balanceRepository:
+                  RepositoryProvider.of<BalanceRepository>(context)),
         ),
         BlocProvider(
           create: (context) => DriveBackupBloc(
@@ -75,9 +80,22 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(create: (context) => GoogleAuthBloc()),
         BlocProvider(
-            create: (context) => BalanceBloc(
-                balanceRepository:
-                    RepositoryProvider.of<BalanceRepository>(context)))
+          create: (context) => BalanceBloc(
+            balanceRepository:
+                RepositoryProvider.of<BalanceRepository>(context),
+          ),
+        ),
+        BlocProvider(
+          create: (context) => LimitsBloc(
+            limitRepository: RepositoryProvider.of<LimitRepository>(context),
+          ),
+        ),
+        BlocProvider(
+          create: (context) => LimitPickerBloc(
+            categoryRepository: RepositoryProvider.of<CategoryRepository>(context),
+            subcategoryRepository: RepositoryProvider.of<SubcategoryRepository>(context)
+          ),
+        ),
       ],
       child: MaterialApp(
         title: 'Flutter Demo',

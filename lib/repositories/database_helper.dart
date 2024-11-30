@@ -29,7 +29,7 @@ class DatabaseHelper {
 
     final database = await openDatabase(
       dbPath,
-      version: 1,
+      version: 2,
       onCreate: _onCreate,
     );
     return database;
@@ -168,8 +168,17 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         max_value REAL NOT NULL,
         recurrent INTEGER,
-        limit_target_name TEXT,
-        limit_target_id INTEGER
+        begin_date TEXT,
+        end_date TEXT,
+        payment_method_id INTEGER,
+        transaction_type_id INTEGER,
+        category_id INTEGER,
+        subcategory_id INTEGER,
+        
+        FOREIGN KEY(payment_method_id) REFERENCES payment_methods(id),
+        FOREIGN KEY(transaction_type_id) REFERENCES transaction_types(id),
+        FOREIGN KEY(category_id) REFERENCES categories(id),
+        FOREIGN KEY(subcategory_id) REFERENCES subcategories(id)
       );
     ''');
   }

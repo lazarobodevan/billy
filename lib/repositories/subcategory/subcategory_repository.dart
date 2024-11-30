@@ -45,4 +45,13 @@ class SubcategoryRepository implements ISubcategoryRepository {
     final updatedCategory = await db.query('subcategories', where: 'id = ?', whereArgs: [subcategory.id]);
     return Subcategory.fromMap(updatedCategory[0]);
   }
+
+  @override
+  Future<List<Subcategory>> getAll() async{
+    final db = await _databaseHelper.database;
+    var subcategories = await db.query("subcategories");
+    return subcategories.map((sub){
+      return Subcategory.fromMap(sub);
+    }).toList();
+  }
 }

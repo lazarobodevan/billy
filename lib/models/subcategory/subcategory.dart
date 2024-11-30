@@ -25,6 +25,22 @@ class Subcategory {
       this.color = const Color(0xFFFFFFFF),
       this.icon = Icons.question_mark});
 
+  Subcategory copyWith({
+    int? id,
+    int? parentId,
+    String? name,
+    Color? color,
+    IconData? icon,
+  }) {
+    return Subcategory(
+      id: id ?? this.id,
+      parentId: parentId ?? this.parentId,
+      name: name ?? this.name,
+      color: color ?? this.color,
+      icon: icon ?? this.icon,
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -39,8 +55,10 @@ class Subcategory {
     return Subcategory(
         id: map['subcategory_id'] ?? map['id'],
         parentId: map['category_id'],
-        name: map['subcategory_name'] ??  map['name'],
-        color: ColorConverter.intToColor(map['subcategory_color'] ?? map['color']),
-    icon: IconConverter.parseIconFromDb(jsonDecode(map['subcategory_icon'] ?? map['icon'])));
+        name: map['subcategory_name'] ?? map['name'],
+        color:
+            ColorConverter.intToColor(map['subcategory_color'] ?? map['color']),
+        icon: IconConverter.parseIconFromDb(
+            jsonDecode(map['subcategory_icon'] ?? map['icon'])));
   }
 }
