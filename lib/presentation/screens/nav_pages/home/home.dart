@@ -3,7 +3,7 @@ import 'dart:ui';
 
 import 'package:billy/enums/transaction/transaction_type.dart';
 import 'package:billy/models/limit/limit_model.dart';
-import 'package:billy/presentation/screens/nav_pages/home/widgets/draggable_transactions_container.dart';
+import 'package:billy/presentation/screens/limits/bloc/limits_bloc.dart';
 import 'package:billy/presentation/screens/transaction/bloc/transaction_bloc.dart';
 import 'package:billy/presentation/shared/blocs/google_auth_bloc/google_auth_bloc.dart';
 import 'package:billy/presentation/shared/components/action_button.dart';
@@ -80,142 +80,161 @@ class _HomeState extends State<Home> {
       return null;
     }
 
-    return BlocListener<TransactionBloc, TransactionState>(
-        listener: (context, state) {
-          if (state is SavedTransactionToDatabaseState) {
-            BlocProvider.of<HomeBloc>(context).add(LoadHomeEvent());
-          }
-        },
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Material(
-              color: Colors.transparent,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 38,
-                            height: 38,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(50),
-                              color: ThemeColors.primary1,
+    return BlocListener<LimitsBloc, LimitsState>(
+      listener: (context, state) {
+        if (state is UpdatedLimitState || state is DeletedLimitState) {
+          BlocProvider.of<HomeBloc>(context).add(LoadHomeEvent());
+        }
+      },
+      child: BlocListener<TransactionBloc, TransactionState>(
+          listener: (context, state) {
+            if (state is SavedTransactionToDatabaseState) {
+              BlocProvider.of<HomeBloc>(context).add(LoadHomeEvent());
+            }
+          },
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Material(
+                color: Colors.transparent,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 38,
+                              height: 38,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(50),
+                                color: ThemeColors.primary1,
+                              ),
+                              child: _getProfilePicture() != null
+                                  ? Image.network(_getProfilePicture()!)
+                                  : SizedBox(),
                             ),
-                            child: _getProfilePicture() != null
-                                ? Image.network(_getProfilePicture()!)
-                                : SizedBox(),
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            loggedUser?.displayName ?? "Você",
-                            style: TypographyStyles.label3(),
-                          ),
-                        ],
-                      ),
-                      Container(
-                        width: 30,
-                        height: 30,
-                        decoration: BoxDecoration(
-                          color: ThemeColors.primary3,
-                          borderRadius: BorderRadius.circular(50),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black26,
-                              offset: Offset(0, 4),
-                              blurRadius: 4,
+                            const SizedBox(width: 10),
+                            Text(
+                              loggedUser?.displayName ?? "Você",
+                              style: TypographyStyles.label3(),
                             ),
                           ],
                         ),
-                        child: const Icon(Icons.notifications_none),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 17),
-                  Text(
-                    "Disponível na conta",
-                    style: TypographyStyles.paragraph3(),
-                  ),
-                  Text(
-                    CurrencyFormatter.format(state.balance.balance),
-                    style: TypographyStyles.headline3(),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Limite no cartão",
-                        style: TypographyStyles.label2(),
-                      ),
-                      Text(
-                        CurrencyFormatter.format(state.balance.creditLimit),
-                        style: TypographyStyles.paragraph3(),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 7),
-                  Stack(
-                    children: [
-                      Container(
-                        width: MediaQuery.of(context).size.width,
-                        height: 1,
-                        color: Colors.black12,
-                      ),
-                      Container(
-                        width: getCreditLimitWidth(
-                          limit: state.balance.creditLimit,
-                          limitUsed: state.balance.limitUsed,
+                        Container(
+                          width: 30,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            color: ThemeColors.primary3,
+                            borderRadius: BorderRadius.circular(50),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black26,
+                                offset: Offset(0, 4),
+                                blurRadius: 4,
+                              ),
+                            ],
+                          ),
+                          child: const Icon(Icons.notifications_none),
                         ),
-                        height: 2,
-                        color: ThemeColors.primary1,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    "Fatura: ${CurrencyFormatter.format(state.balance.limitUsed)}",
-                  ),
-                  const SizedBox(height: 22),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Flexible(
-                        child: ActionButton(
-                          text: "Pagar",
-                          icon: Icons.payments_sharp,
-                          onTap: () {
-                            Navigator.of(context).pushNamed("/transaction");
-                          },
+                      ],
+                    ),
+                    const SizedBox(height: 17),
+                    Text(
+                      "Disponível na conta",
+                      style: TypographyStyles.paragraph3(),
+                    ),
+                    Text(
+                      CurrencyFormatter.format(state.balance.balance),
+                      style: TypographyStyles.headline3(),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Limite no cartão",
+                          style: TypographyStyles.label2(),
                         ),
-                      ),
-                      const SizedBox(width: 40),
-                      Flexible(
-                        child: ActionButton(
-                          text: "Receber",
-                          icon: Icons.add_circle,
-                          onTap: () {
-                            Navigator.of(context).pushNamed("/transaction");
-                          },
+                        Text(
+                          CurrencyFormatter.format(state.balance.creditLimit),
+                          style: TypographyStyles.paragraph3(),
                         ),
-                      ),
-                    ],
-                  ),
-          
-                  const SizedBox(height: 30,),
-                  Text("Orçamentos", style: TypographyStyles.label2(),),
-                  const SizedBox(height: 4,),
-          
-
-                ],
+                      ],
+                    ),
+                    const SizedBox(height: 7),
+                    Stack(
+                      children: [
+                        Container(
+                          width: MediaQuery.of(context).size.width,
+                          height: 1,
+                          color: Colors.black12,
+                        ),
+                        Container(
+                          width: getCreditLimitWidth(
+                            limit: state.balance.creditLimit,
+                            limitUsed: state.balance.limitUsed,
+                          ),
+                          height: 2,
+                          color: ThemeColors.primary1,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      "Fatura: ${CurrencyFormatter.format(state.balance.limitUsed)}",
+                    ),
+                    const SizedBox(height: 22),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Flexible(
+                          child: ActionButton(
+                            text: "Pagar",
+                            icon: Icons.payments_sharp,
+                            onTap: () {
+                              Navigator.of(context).pushNamed("/transaction");
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 40),
+                        Flexible(
+                          child: ActionButton(
+                            text: "Receber",
+                            icon: Icons.add_circle,
+                            onTap: () {
+                              Navigator.of(context).pushNamed("/transaction");
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    Text(
+                      "Orçamentos",
+                      style: TypographyStyles.label2(),
+                    ),
+                    const SizedBox(
+                      height: 4,
+                    ),
+                    if (state.limits.isEmpty)
+                      Text("Sem orçamentos")
+                    else
+                      Column(
+                        children: state.limits.map((el) {
+                          return LimitItem(limit: el);
+                        }).toList(),
+                      )
+                  ],
+                ),
               ),
             ),
-          ),
-        ));
+          )),
+    );
   }
 
   double getCreditLimitWidth(

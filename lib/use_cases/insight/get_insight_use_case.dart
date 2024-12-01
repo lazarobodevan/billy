@@ -14,13 +14,16 @@ class GetInsightUseCase {
       {TransactionType? type = TransactionType.EXPENSE,
       required PeriodFilter periodFilter,
       bool? groupByCategory = true,
+      int? categoryId,
       required bool showIncomes,
       required bool showExpenses}) async {
 
     final insight = await repository.getInsights(
         periodFilter: periodFilter,
         type: type ?? TransactionType.EXPENSE,
-        groupByCategory: groupByCategory ?? true);
+        groupByCategory: groupByCategory ?? true,
+      categoryId: categoryId
+    );
 
     insight.lineChartData = await repository.getLineChartData(
         showIncomes: showIncomes, showExpenses: showExpenses);

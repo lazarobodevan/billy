@@ -15,7 +15,8 @@ class InsightRepository extends IInsightRepository {
   Future<Insight> getInsights(
       {TransactionType? type = TransactionType.EXPENSE,
       required PeriodFilter periodFilter,
-      bool? groupByCategory = true}) async {
+      bool? groupByCategory = true,
+      int? categoryId}) async {
     final db = await _databaseHelper.database;
 
     final String query = groupByCategory!
@@ -49,9 +50,11 @@ class InsightRepository extends IInsightRepository {
         FROM transactions
         LEFT JOIN categories ON transactions.category_id = categories.id
         LEFT JOIN subcategories ON transactions.subcategory_id = subcategories.id
-        WHERE transactions.type_id = 2
+        WHERE transactions.type_id = ${TransactionTypeExtension.toDatabase(type!)}
         AND subcategories.id IS NOT NULL
-        AND categories.id = 2  -- Substitua :desired_category_id pelo ID da categoria desejada
+        AND categories.id = $categoryId  -- Substitua :desired_category_id pelo ID da categoria desejada
+        AND transactions.date >= ?
+        AND (transactions.end_date IS NULL OR transactions.end_date <= ?)
         GROUP BY subcategories.id, subcategories.name, subcategories.color, subcategories.icon, categories.name, categories.color
         
         UNION ALL
@@ -74,9 +77,11 @@ class InsightRepository extends IInsightRepository {
             ) as total_value
         FROM transactions
         LEFT JOIN categories ON transactions.category_id = categories.id
-        WHERE transactions.type_id = 2
+        WHERE transactions.type_id = ${TransactionTypeExtension.toDatabase(type!)}
         AND transactions.subcategory_id IS NULL
-        AND categories.id = 2  -- Substitua :desired_category_id pelo ID da categoria desejada
+        AND categories.id = $categoryId  -- Substitua :desired_category_id pelo ID da categoria desejada
+        AND transactions.date >= ?
+        AND (transactions.end_date IS NULL OR transactions.end_date <= ?)
         GROUP BY categories.id, categories.color, categories.icon, categories.name;
         ''';
 
@@ -87,6 +92,7 @@ class InsightRepository extends IInsightRepository {
         periodFilter.beginDate.toIso8601String(),
         periodFilter.endDate.toIso8601String()
       ]);
+      return Insight.fromMap(queryResult);
     } else {
       queryResult = await db.rawQuery(query, [
         periodFilter.beginDate.toIso8601String(),
@@ -94,9 +100,10 @@ class InsightRepository extends IInsightRepository {
         periodFilter.beginDate.toIso8601String(),
         periodFilter.endDate.toIso8601String()
       ]);
+      return Insight.fromMapSubcategory(queryResult);
     }
 
-    return Insight.fromMap(queryResult);
+
   }
 
   @override

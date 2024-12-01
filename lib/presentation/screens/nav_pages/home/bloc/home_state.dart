@@ -16,12 +16,12 @@ class LoadingHomeState extends HomeState{
 }
 
 class LoadedHomeState extends HomeState{
-  final List<Transaction> transactions;
   final Balance balance;
+  final List<LimitModel> limits;
 
-  const LoadedHomeState({required this.transactions, required this.balance});
+  const LoadedHomeState({required this.balance, required this.limits});
 
   @override
-  List<Object?> get props => [transactions, balance];
+  List<Object?> get props => [limits, balance];
 
 }

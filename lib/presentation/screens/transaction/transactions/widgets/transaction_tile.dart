@@ -25,7 +25,7 @@ class TransactionTile extends StatelessWidget {
 
     if (category != null) {
       if (subcategory != null) {
-        return subcategory.color;
+        return subcategory.color!;
       }
       return category.color;
     }
@@ -41,7 +41,7 @@ class TransactionTile extends StatelessWidget {
 
     if (category != null) {
       if (subcategory != null) {
-        return subcategory.icon;
+        return subcategory.icon!;
       }
       return category.icon;
     }

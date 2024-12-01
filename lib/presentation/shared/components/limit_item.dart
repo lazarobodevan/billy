@@ -1,4 +1,5 @@
 import 'package:billy/models/limit/limit_model.dart';
+import 'package:billy/presentation/screens/limits/limit_editor/limit_editor_screen.dart';
 import 'package:billy/presentation/theme/colors.dart';
 import 'package:billy/presentation/theme/typography.dart';
 import 'package:flutter/material.dart';
@@ -25,49 +26,62 @@ class LimitItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 60,
-      decoration: BoxDecoration(
-          border:
-              Border.all(color: ThemeColors.primary1.withOpacity(.3), width: 2),
-          borderRadius: BorderRadius.circular(6)),
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(limit.limitTargetName),
-                Row(
-                  children: [
-                    Text(
-                        'R\$${(limit.maxValue - limit.currentValue).toStringAsFixed(2)}'),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    Text('${_getPercentage().toStringAsFixed(0)}%')
-                  ],
-                )
-              ],
+    return InkWell(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => LimitEditorScreen(
+              limitModel: limit,
             ),
-            const SizedBox(height: 4,),
-            Stack(
-              children: [
-                Container(
-                  height: 4,
-                  color: Colors.grey.shade200,
-                ),
-                Container(
-                  height: 4,
-                  width: (MediaQuery.of(context).size.width *
-                      (_getPercentage()/100)),
-                  color: _getSemanticColor(),
-                ),
-              ],
-            )
-          ],
+          ),
+        );
+      },
+      child: Ink(
+        height: 60,
+        decoration: BoxDecoration(
+            border: Border.all(
+                color: ThemeColors.primary1.withOpacity(.3), width: 2),
+            borderRadius: BorderRadius.circular(6)),
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(limit.limitTargetName),
+                  Row(
+                    children: [
+                      Text(
+                          'R\$${(limit.maxValue - limit.currentValue).toStringAsFixed(2)}'),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      Text('${_getPercentage().toStringAsFixed(0)}%')
+                    ],
+                  )
+                ],
+              ),
+              const SizedBox(
+                height: 4,
+              ),
+              Stack(
+                children: [
+                  Container(
+                    height: 4,
+                    color: Colors.grey.shade200,
+                  ),
+                  Container(
+                    height: 4,
+                    width: (MediaQuery.of(context).size.width *
+                        (_getPercentage() / 100)),
+                    color: _getSemanticColor(),
+                  ),
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );

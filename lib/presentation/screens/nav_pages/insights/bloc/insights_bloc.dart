@@ -17,9 +17,17 @@ part 'insights_state.dart';
 class InsightsBloc extends Bloc<InsightsEvent, InsightsState> {
   final IInsightRepository insightsRepository;
   Insight expensesInsight = Insight.empty();
-  Insight incomeInsight = Insight.empty();
+  late Insight incomeInsight = Insight.empty();
+  bool? insightsByCategory = false;
+  int? categoryId;
+
+  final Map<InsightTabEnum, PeriodFilter> _periodFilters = {};
 
   late final GetInsightUseCase getInsightUseCase;
+
+  PeriodFilter? getPeriodFilter(InsightTabEnum tab) {
+    return _periodFilters[tab];
+  }
 
   InsightsBloc({required this.insightsRepository}) : super(InsightsInitial()) {
     getInsightUseCase = GetInsightUseCase(repository: insightsRepository);
@@ -29,6 +37,7 @@ class InsightsBloc extends Bloc<InsightsEvent, InsightsState> {
     });
 
     on<GetInsightEvent>((event, emit) async {
+
       try {
         if(event.insightsTab == InsightTabEnum.EXPENSE){
           emit(LoadingExpensesInsights());
@@ -36,23 +45,34 @@ class InsightsBloc extends Bloc<InsightsEvent, InsightsState> {
         if(event.insightsTab == InsightTabEnum.INCOME) {
           emit(LoadingIncomesInsights());
         }
+
+        _periodFilters[event.insightsTab] = event.periodFilter;
+
         final insight = await getInsightUseCase.execute(
             periodFilter: event.periodFilter,
             type: event.type,
             groupByCategory: event.groupByCategory,
+            categoryId: event.categoryId,
             showExpenses: _showExpenses(event.insightsTab),
             showIncomes: _showIncomes(event.insightsTab));
+
         if(event.insightsTab == InsightTabEnum.EXPENSE){
           expensesInsight = insight;
         }
         if(event.insightsTab == InsightTabEnum.INCOME){
           incomeInsight = insight;
         }
-        emit(LoadedInsights(insight: insight));
+
+        insightsByCategory = event.groupByCategory;
+        categoryId = event.categoryId;
+
+        emit(LoadedInsights(insight: insight,tabEnum: event.insightsTab));
       } catch (e) {
         emit(LoadingInsightsError());
       }
     });
+
+
   }
   
   bool _showExpenses(InsightTabEnum tab){

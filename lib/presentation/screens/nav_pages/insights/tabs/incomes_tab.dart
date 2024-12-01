@@ -28,10 +28,24 @@ class IncomesTab extends StatelessWidget {
         type: TransactionType.INCOME);
   }
 
+  InsightsEvent getByCategory(int id) {
+    DateTime beginDate = MyDateUtils.getFirstDayOfMonth();
+    DateTime endDate = MyDateUtils.getLastDayOfMonth();
+
+    return GetInsightEvent(
+        periodFilter: PeriodFilter(beginDate: beginDate, endDate: endDate),
+        insightsTab: InsightTabEnum.INCOME,
+        type: TransactionType.INCOME,
+      groupByCategory: false,
+      categoryId: id
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return InsightTabBase(
         getInsightEventInitial: _getInsightEventInitial,
+        getByCategory: getByCategory,
         pieChartText: "Ganho total",
         lineChartText: "Ganho por mês",
         tabEnum: InsightTabEnum.INCOME);

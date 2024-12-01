@@ -24,11 +24,12 @@ class LoadingExpensesInsights extends InsightsState{
 class LoadedInsights extends InsightsState{
 
   final Insight insight;
+  final InsightTabEnum tabEnum;
 
-  const LoadedInsights({required this.insight});
+  const LoadedInsights({required this.insight, required this.tabEnum});
 
   @override
-  List<Object?> get props => [insight];
+  List<Object?> get props => [insight, tabEnum];
 
 }
 

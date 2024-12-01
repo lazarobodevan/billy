@@ -73,8 +73,11 @@ class LimitRepository extends ILimitRepository {
   }
 
   @override
-  Future<LimitModel> update(LimitModel limit) {
-    // TODO: implement update
-    throw UnimplementedError();
+  Future<LimitModel> update(LimitModel limit) async{
+    var db = await _databaseHelper.database;
+
+    await db.update("limits", limit.toMap());
+
+    return limit;
   }
 }

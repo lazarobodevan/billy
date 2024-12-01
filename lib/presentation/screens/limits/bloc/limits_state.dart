@@ -62,3 +62,52 @@ class ListLimitsErrorState extends LimitsState{
   List<Object?> get props => [message];
 
 }
+
+class UpdatingLimitState extends LimitsState{
+  @override
+  List<Object?> get props => [];
+
+}
+
+class UpdatedLimitState extends LimitsState{
+  final LimitModel limit;
+
+  const UpdatedLimitState({required this.limit});
+
+  @override
+  List<Object?> get props => [limit];
+
+}
+
+class UpdateLimitErrorState extends LimitsState{
+
+  final String message;
+
+  const UpdateLimitErrorState({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+
+}
+
+class DeletingLimitState extends LimitsState{
+  @override
+  List<Object?> get props => [];
+
+}
+
+class DeletedLimitState extends LimitsState{
+  @override
+  List<Object?> get props => [];
+
+}
+
+class DeleteLimitErrorState extends LimitsState{
+  final String message;
+
+  const DeleteLimitErrorState({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+
+}

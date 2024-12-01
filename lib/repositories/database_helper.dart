@@ -29,8 +29,11 @@ class DatabaseHelper {
 
     final database = await openDatabase(
       dbPath,
-      version: 2,
+      version: 3,
       onCreate: _onCreate,
+      onUpgrade: (database, al, el){
+        createCreditCardInvoicesTable(database);
+      }
     );
     return database;
   }
@@ -71,6 +74,7 @@ class DatabaseHelper {
     createPaymentMethodsTable(db);
     createGoalsTable(db);
     createLimitsTable(db);
+    createCreditCardInvoicesTable(db);
 
     await insertDefaultValues(db);
   }
@@ -180,6 +184,17 @@ class DatabaseHelper {
         FOREIGN KEY(category_id) REFERENCES categories(id),
         FOREIGN KEY(subcategory_id) REFERENCES subcategories(id)
       );
+    ''');
+  }
+
+  Future<void> createCreditCardInvoicesTable(Database db) async{
+    db.execute('''
+      CREATE TABLE credit_card_invoices(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        total REAL NOT NULL DEFAULT 0,
+        begin_date TEXT NOT NULL,
+        end_date TEXT NOT NULL
+      )
     ''');
   }
 

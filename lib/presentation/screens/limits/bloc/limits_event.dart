@@ -19,3 +19,21 @@ class ListLimitsEvent extends LimitsEvent {
   List<Object?> get props => [];
 
 }
+
+class UpdateLimitEvent extends LimitsEvent{
+  final LimitModel limit;
+
+  const UpdateLimitEvent({required this.limit});
+
+  @override
+  List<Object?> get props => [limit];
+}
+
+class DeleteLimitEvent extends LimitsEvent{
+  final int id;
+
+  const DeleteLimitEvent({required this.id});
+
+  @override
+  List<Object?> get props => [id];
+}

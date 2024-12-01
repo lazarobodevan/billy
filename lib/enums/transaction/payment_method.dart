@@ -20,9 +20,9 @@ extension PaymentMethodExtension on PaymentMethod {
       case 1:
         return PaymentMethod.PIX;
       case 2:
-        return PaymentMethod.MONEY;
-      case 3:
         return PaymentMethod.CREDIT_CARD;
+      case 3:
+        return PaymentMethod.MONEY;
       default:
         throw ArgumentError('Invalid index for PaymentMethod: $index');
     }

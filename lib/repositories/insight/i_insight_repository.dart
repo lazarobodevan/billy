@@ -7,7 +7,8 @@ abstract class IInsightRepository {
   Future<Insight> getInsights(
       {TransactionType? type = TransactionType.EXPENSE,
       required PeriodFilter periodFilter,
-      bool? groupByCategory = true});
+      bool? groupByCategory = true,
+      int? categoryId});
 
   Future<MyLineChartData> getLineChartData({required bool showIncomes, required bool showExpenses});
 }

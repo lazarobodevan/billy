@@ -8,6 +8,7 @@ import 'package:billy/models/insight/my_line_chart_spots.dart';
 import 'package:billy/models/insight/period_filter.dart';
 import 'package:billy/presentation/screens/nav_pages/insights/components/category_item_insight.dart';
 import 'package:billy/presentation/screens/nav_pages/insights/components/line_chart/my_line_chart.dart';
+import 'package:billy/presentation/screens/nav_pages/insights/components/my_pie_chart.dart';
 import 'package:billy/presentation/screens/nav_pages/insights/data/fake_pie_chart_data.dart';
 import 'package:billy/presentation/screens/nav_pages/insights/enums/insight_tab.dart';
 import 'package:billy/presentation/shared/components/toggle_time.dart';
@@ -21,16 +22,17 @@ import '../bloc/insights_bloc.dart';
 
 class InsightTabBase extends StatefulWidget {
   final InsightsEvent Function() getInsightEventInitial;
+  final InsightsEvent Function(int) getByCategory;
   final String pieChartText;
   final String lineChartText;
   final InsightTabEnum tabEnum;
 
-  const InsightTabBase(
-      {super.key,
-      required this.getInsightEventInitial,
-      required this.pieChartText,
-      required this.lineChartText,
-      required this.tabEnum});
+  const InsightTabBase({super.key,
+    required this.getInsightEventInitial,
+    required this.pieChartText,
+    required this.lineChartText,
+    required this.tabEnum,
+    required this.getByCategory});
 
   @override
   State<InsightTabBase> createState() => _InsightTabBaseState();
@@ -44,18 +46,31 @@ class _InsightTabBaseState extends State<InsightTabBase>
     super.initState();
   }
 
+  void getBySubcategory(int id) {
+    BlocProvider.of<InsightsBloc>(context).add(widget.getByCategory(id));
+  }
+
+  void getByCategory(){
+    print("oi");
+    BlocProvider.of<InsightsBloc>(context).add(widget.getInsightEventInitial());
+  }
+
+  bool getShowResetButton() {
+    var bloc = BlocProvider.of<InsightsBloc>(context);
+    return bloc.categoryId != null ? !bloc.insightsByCategory! : false;
+  }
+
+  void onReset() {
+    var bloc = BlocProvider.of<InsightsBloc>(context);
+  }
+
   @override
   bool get wantKeepAlive => true;
 
-  String _getPercentageAsText(double value, double total) {
-    var percentage = (value / total) * 100;
-
-    return "${percentage.toStringAsFixed(0)}%";
-  }
-
   List<MyLineChartSpots> _getLineSpots(MyLineChartData data) {
     var result = data.spots
-        .map((chartSpot) => MyLineChartSpots(
+        .map((chartSpot) =>
+        MyLineChartSpots(
             spots: chartSpot.spots,
             lineColor: _getChartLineColor(chartSpot.transactionType),
             transactionType: chartSpot.transactionType))
@@ -82,253 +97,148 @@ class _InsightTabBaseState extends State<InsightTabBase>
     return maxValue + 200;
   }
 
-  bool _hasInsightData(InsightsBloc bloc) {
-    return (widget.tabEnum == InsightTabEnum.EXPENSE &&
-            bloc.expensesInsight.insightsByCategory.isNotEmpty) ||
-        (widget.tabEnum == InsightTabEnum.INCOME &&
-            bloc.incomeInsight.insightsByCategory.isNotEmpty);
-  }
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    var bloc = BlocProvider.of<InsightsBloc>(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       controller: ScrollController(),
-      child:
-          BlocBuilder<InsightsBloc, InsightsState>(builder: (context, state) {
-        if (state is LoadingInsightsError) {
-          return const Center(
-            child: Text("Erro ao carregar insights"),
-          );
-        }
-
-        if (state is LoadingExpensesInsights &&
-                widget.tabEnum == InsightTabEnum.EXPENSE ||
-            state is LoadingIncomesInsights &&
-                widget.tabEnum == InsightTabEnum.INCOME) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-
-        var bloc = BlocProvider.of<InsightsBloc>(context);
-        var insight = widget.tabEnum == InsightTabEnum.EXPENSE
-            ? bloc.expensesInsight
-            : widget.tabEnum == InsightTabEnum.INCOME
-                ? bloc.incomeInsight
-                : bloc.expensesInsight;
-
-        return Column(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: ThemeColors.primary3,
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: const [
-                      BoxShadow(
-                          color: Colors.black12,
-                          offset: Offset(0, 5),
-                          blurRadius: 10)
-                    ],
-                  ),
-                  child: Stack(
-                    children: [
-                      //Pie chart section
-                      _buildInsightPieChartSection(insight),
-
-                      // Not enough data
-                      if (!_hasInsightData(bloc)) _buildNotEnoughDataOverlay()
-                    ],
-                  ),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Text("Separação de gastos", style: TypographyStyles.label2()),
-                const SizedBox(
-                  height: 15,
-                ),
-                Column(
-                  children: insight.insightsByCategory
-                      .map((el) => CategoryItemInsight(
-                            value: el.value,
-                            percentage: ((el.value / insight.totalExpent) * 100)
-                                .toInt(),
-                            category: el.category,
-                          ))
-                      .toList(),
-                )
-              ],
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            MyLineChart(
-              text: widget.lineChartText,
-              lineColor: Colors.red,
-              minX: 0,
-              minY: _getLineChartMinValue(insight.lineChartData.minValue),
-              maxX: 11,
-              maxY: _getLineChartMaxValue(insight.lineChartData.maxValue),
-              spots: _getLineSpots(insight.lineChartData),
-            )
-          ],
-        );
-      }),
-    );
-  }
-
-  Widget _buildPieChart(Insight insight) {
-    return PieChart(
-      swapAnimationCurve: Curves.easeInCubic,
-      swapAnimationDuration: const Duration(milliseconds: 700),
-      PieChartData(
-        sections: insight.insightsByCategory.isNotEmpty
-            ? insight.insightsByCategory
-                .map(
-                  (el) => PieChartSectionData(
-                      color: el.category.color,
-                      value: el.value,
-                      title: "",
-                      badgeWidget: Container(
-                        width: 60,
-                        height: 25,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: const [
-                            BoxShadow(
-                                color: Colors.black12,
-                                blurRadius: 2,
-                                spreadRadius: 2)
-                          ],
-                        ),
-                        child: Center(
-                          child: Text(
-                            _getPercentageAsText(el.value, insight.totalExpent),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                      badgePositionPercentageOffset: 1.2),
-                )
-                .toList()
-            : getPieChartMockedData()
-                .map(
-                  (el) => PieChartSectionData(
-                      color: el.color,
-                      value: el.value,
-                      title: "",
-                      badgeWidget: Container(
-                        width: 60,
-                        height: 25,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: const [
-                            BoxShadow(
-                                color: Colors.black12,
-                                blurRadius: 2,
-                                spreadRadius: 2)
-                          ],
-                        ),
-                        child: Center(
-                          child: Text(
-                            el.title,
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                      badgePositionPercentageOffset: 1.2),
-                )
-                .toList(),
-      ),
-    );
-  }
-
-  Widget _buildNotEnoughDataOverlay() {
-    return ClipRRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-        child: Container(
-          width: double.maxFinite,
-          height: 300,
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(.9),
-          ),
-          child: const Center(
-            child: Text(
-              "Sem informações suficientes",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 19),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInsightPieChartSection(Insight insight) {
-    var bloc = BlocProvider.of<InsightsBloc>(context);
-    return Column(
-      children: [
-        const SizedBox(
-          height: 18,
-        ),
-        AspectRatio(
-          aspectRatio: 1.3,
-          child: Stack(
+      child: Column(
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Align(
-                alignment: Alignment.center,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
+              Container(
+                decoration: BoxDecoration(
+                  color: ThemeColors.primary3,
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: const [
+                    BoxShadow(
+                        color: Colors.black12,
+                        offset: Offset(0, 5),
+                        blurRadius: 10)
+                  ],
+                ),
+                child: Stack(
                   children: [
-                    Text(widget.pieChartText),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * .35,
-                      child: AutoSizeText(
-                        "R\$${insight.totalExpent}",
-                        style: TypographyStyles.headline3(),
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        minFontSize: 22,
-                        overflow: TextOverflow.ellipsis,
+                    //RESET BUTTON
+                      BlocBuilder<InsightsBloc, InsightsState>(
+                        builder: (context, state) {
+                          if (getShowResetButton()) {
+                            return Positioned(
+                                top: 8,
+                                right: 8,
+                                child: Align(
+                                  alignment: Alignment.topRight,
+                                  child: GestureDetector(
+                                    onTap: (){print("oooooo");},
+                                    child: Container(
+                                        decoration: const BoxDecoration(
+                                          color: Colors.blue,
+                                          shape: BoxShape.circle, // Forma circular para garantir clique em bordas.
+                                        ),
+                                      width: 40,
+                                      height: 40,
+                                      child: Center(
+                                        child: const Icon(
+                                            Icons.restart_alt_rounded, size: 10,),
+                                      )),
+                                  ),
+                                ),
+                                );
+                          }
+                          return const SizedBox.shrink();
+                        },
                       ),
-                    )
+
+                    //PIE CHART
+                    MyPieChart(
+                        text: widget.pieChartText,
+                        //insight: insight,
+                        tabEnum: widget.tabEnum,
+                        getInsightEventInitial: widget.getInsightEventInitial),
                   ],
                 ),
               ),
-              _buildPieChart(insight)
+              const SizedBox(
+                height: 20,
+              ),
+              Text("Separação de gastos", style: TypographyStyles.label2()),
+              const SizedBox(
+                height: 15,
+              ),
+              BlocBuilder<InsightsBloc, InsightsState>(
+                builder: (context, state) {
+                  var bloc = BlocProvider.of<InsightsBloc>(context);
+                  var insights = widget.tabEnum == InsightTabEnum.INCOME ? bloc.incomeInsight : bloc.expensesInsight;
+                  if (state is LoadedInsights) {
+                    if (insights.insightsByCategory.isNotEmpty) {
+                      return Column(
+                        children: insights.insightsByCategory
+                            .map((el) =>
+                            CategoryItemInsight(
+                              value: el.value,
+                              percentage:
+                              ((el.value / insights.totalExpent) *
+                                  100)
+                                  .toInt(),
+                              category: el.category,
+                              onTap: () {
+                                bloc.add(
+                                    widget.getByCategory(el.category.id!));
+                              },
+                            ))
+                            .toList(),
+                      );
+                    }
+
+                    if (state.insight.insightsBySubcategory.isNotEmpty) {
+                      return Column(
+                        children: state.insight.insightsBySubcategory!
+                            .map((el) =>
+                            CategoryItemInsight(
+                              value: el.value,
+                              percentage:
+                              ((el.value / state.insight.totalExpent) *
+                                  100)
+                                  .toInt(),
+                              subcategory: el.subcategory,
+                              onTap: () {},
+                            ))
+                            .toList(),
+                      );
+                    }
+                  }
+
+                  return SizedBox.shrink();
+                },
+              )
             ],
           ),
-        ),
-        const SizedBox(
-          height: 16,
-        ),
-        ToggleTime(
-          onSelect: (val) {
-            bloc.add(
-              GetInsightEvent(
-                type: widget.tabEnum == InsightTabEnum.EXPENSE
-                    ? TransactionType.EXPENSE
-                    : TransactionType.INCOME,
-                insightsTab: widget.tabEnum,
-                periodFilter:
-                    PeriodFilter(beginDate: val.start, endDate: val.end),
-                groupByCategory: true,
-              ),
-            );
-          },
-        ),
-        const SizedBox(
-          height: 16,
-        )
-      ],
+          const SizedBox(
+            height: 20,
+          ),
+          BlocBuilder<InsightsBloc, InsightsState>(
+            builder: (context, state) {
+              if (state is LoadedInsights) {
+                return MyLineChart(
+                  text: widget.lineChartText,
+                  lineColor: Colors.red,
+                  minX: 0,
+                  minY: _getLineChartMinValue(
+                      state.insight.lineChartData.minValue),
+                  maxX: 11,
+                  maxY: _getLineChartMaxValue(
+                      state.insight.lineChartData.maxValue),
+                  spots: _getLineSpots(state.insight.lineChartData),
+                );
+              }
+              return CircularProgressIndicator();
+            },
+          )
+        ],
+      ),
     );
   }
 }

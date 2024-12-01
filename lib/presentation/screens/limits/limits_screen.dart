@@ -2,6 +2,7 @@ import 'package:billy/presentation/screens/limits/limit_editor/limit_editor_scre
 import 'package:billy/presentation/shared/components/limit_item.dart';
 import 'package:billy/presentation/theme/colors.dart';
 import 'package:billy/presentation/theme/typography.dart';
+import 'package:billy/services/toast_service/toast_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -45,32 +46,55 @@ class LimitsScreen extends StatelessWidget {
           )
         ],
       ),
-      body: BlocBuilder<LimitsBloc, LimitsState>(
-        bloc: BlocProvider.of<LimitsBloc>(context)..add(ListLimitsEvent()),
-        builder: (context, state) {
-          if (state is ListingLimitsState) {
-            return const Center(child: CircularProgressIndicator());
+      body: BlocListener<LimitsBloc, LimitsState>(
+        listener: (context, state) {
+
+          if(state is CreatedLimitState){
+            ToastService.showSuccess(message: "Limite criado com sucesso!");
           }
 
-          if(state is ListLimitsErrorState){
-            return Center(child: Text(state.message),);
+          if(state is UpdatedLimitState){
+            ToastService.showSuccess(message: "Limite atualizado com sucesso!");
           }
 
-          if(state is ListedLimitsState) {
-            if(state.limits.isEmpty){
-              return const Center(child: Text("Sem orçamentos"),);
-            }
-            return SingleChildScrollView(
-              child: Column(
-                children: state.limits.map((el){
-                  return LimitItem(limit: el);
-                }).toList(),
-              ),
-            );
+          if(state is DeletedLimitState){
+            ToastService.showSuccess(message: "Limite deletado com sucesso!");
           }
 
-          return SizedBox.shrink();
+          if(state is CreatedLimitState || state is UpdatedLimitState || state is DeletedLimitState){
+           BlocProvider.of<LimitsBloc>(context).add(ListLimitsEvent());
+          }
+
         },
+        child: BlocBuilder<LimitsBloc, LimitsState>(
+          bloc: BlocProvider.of<LimitsBloc>(context)
+            ..add(ListLimitsEvent()),
+          builder: (context, state) {
+            if (state is ListingLimitsState) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (state is ListLimitsErrorState) {
+              return Center(child: Text(state.message),);
+            }
+
+            if (state is ListedLimitsState) {
+              if (state.limits.isEmpty) {
+                return const Center(child: Text("Sem orçamentos"),);
+              }
+              return SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  children: state.limits.map((el) {
+                    return LimitItem(limit: el);
+                  }).toList(),
+                ),
+              );
+            }
+
+            return SizedBox.shrink();
+          },
+        ),
       ),
     );
   }

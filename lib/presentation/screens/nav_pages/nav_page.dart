@@ -5,6 +5,7 @@ import 'package:billy/presentation/screens/nav_pages/more/more.dart';
 import 'package:billy/presentation/screens/transaction/transactions/transactions.dart';
 import 'package:billy/presentation/theme/colors.dart';
 import 'package:billy/repositories/balance/balance_repository.dart';
+import 'package:billy/repositories/limit/limit_repository.dart';
 import 'package:billy/repositories/transaction/transaction_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -80,7 +81,8 @@ Widget _buildHome() {
     create: (context) => HomeBloc(
       transactionRepository:
           RepositoryProvider.of<TransactionRepository>(context),
-      balanceRepository: RepositoryProvider.of<BalanceRepository>(context)
+      limitRepository: RepositoryProvider.of<LimitRepository>(context),
+      balanceRepository: RepositoryProvider.of<BalanceRepository>(context),
     ),
     child: Home(),
   );

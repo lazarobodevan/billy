@@ -10,10 +10,11 @@ class GetInsightEvent extends InsightsEvent{
   final PeriodFilter periodFilter;
   final InsightTabEnum insightsTab;
   final bool? groupByCategory;
+  final int? categoryId;
 
-  const GetInsightEvent({required this.periodFilter, required this.type, this.groupByCategory, required this.insightsTab});
+  const GetInsightEvent({required this.periodFilter, required this.type, this.groupByCategory, required this.insightsTab, this.categoryId});
 
   @override
-  List<Object?> get props => [type, periodFilter, groupByCategory];
+  List<Object?> get props => [type, periodFilter, groupByCategory,categoryId];
 
 }

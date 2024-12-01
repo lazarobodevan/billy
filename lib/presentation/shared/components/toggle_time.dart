@@ -22,6 +22,7 @@ class _ToggleTimeState extends State<ToggleTime> {
   @override
   void initState() {
     _selectedDate = widget.selectedDate ?? DatePeriod(MyDateUtils.getFirstDayOfMonth(), MyDateUtils.getLastDayOfMonth());
+    print("Selected date: ${_selectedDate.start} / ${_selectedDate.end}");
     super.initState();
   }
 
@@ -37,6 +38,7 @@ class _ToggleTimeState extends State<ToggleTime> {
             setState(() {
               _selectedDate = DatePeriod(result.start, result.end);
               widget.onSelect(_selectedDate);
+              print("Selected Date Range: ${_selectedDate.start} - ${_selectedDate.end}");
             });
           }
         },

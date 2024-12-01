@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 
 class Subcategory {
   int? id;
-  int parentId;
+  int? parentId;
   String name;
-  Color color;
-  IconData icon;
+  Color? color;
+  IconData? icon;
 
   Subcategory(
       {this.id,
@@ -46,8 +46,8 @@ class Subcategory {
       'id': id,
       'category_id': parentId,
       'name': name,
-      'color': ColorConverter.colorToInt(color),
-      'icon': IconConverter.parseIconToDb(icon)
+      'color': ColorConverter.colorToInt(color!),
+      'icon': IconConverter.parseIconToDb(icon!)
     };
   }
 
@@ -56,9 +56,9 @@ class Subcategory {
         id: map['subcategory_id'] ?? map['id'],
         parentId: map['category_id'],
         name: map['subcategory_name'] ?? map['name'],
-        color:
-            ColorConverter.intToColor(map['subcategory_color'] ?? map['color']),
-        icon: IconConverter.parseIconFromDb(
-            jsonDecode(map['subcategory_icon'] ?? map['icon'])));
+        color: map['subcategory_color'] != null ?
+            ColorConverter.intToColor(map['subcategory_color'] ?? map['color']) : null,
+        icon: map['subcategory_icon'] != null ? IconConverter.parseIconFromDb(
+            jsonDecode(map['subcategory_icon'] ?? map['icon'])) : null);
   }
 }

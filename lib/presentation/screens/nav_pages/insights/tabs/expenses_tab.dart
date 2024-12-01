@@ -20,20 +20,43 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class ExpensesTab extends StatelessWidget {
   const ExpensesTab({super.key});
 
-  InsightsEvent _getInsightEventInitial() {
-    DateTime beginDate = MyDateUtils.getFirstDayOfMonth();
-    DateTime endDate = MyDateUtils.getLastDayOfMonth();
-
-    return GetInsightEvent(
-        periodFilter: PeriodFilter(beginDate: beginDate, endDate: endDate),
-        insightsTab: InsightTabEnum.EXPENSE,
-        type: TransactionType.EXPENSE);
-  }
-
   @override
   Widget build(BuildContext context) {
+    InsightsEvent _getInsightEventInitial() {
+      var bloc = BlocProvider.of<InsightsBloc>(context);
+
+      // Garante que o filtro de período da aba atual sempre será utilizado.
+      PeriodFilter currentFilter =
+          bloc.getPeriodFilter(InsightTabEnum.EXPENSE) ??
+              PeriodFilter(
+                  beginDate: MyDateUtils.getFirstDayOfMonth(),
+                  endDate: MyDateUtils.getLastDayOfMonth());
+
+      return GetInsightEvent(
+          periodFilter: currentFilter,
+          insightsTab: InsightTabEnum.EXPENSE,
+          type: TransactionType.EXPENSE);
+    }
+
+    InsightsEvent _getByCategory(int id) {
+      var bloc = BlocProvider.of<InsightsBloc>(context);
+
+      // Garante que o filtro de período da aba atual sempre será utilizado.
+      PeriodFilter currentFilter =
+          bloc.getPeriodFilter(InsightTabEnum.EXPENSE)!;
+
+      return GetInsightEvent(
+        periodFilter: currentFilter,
+        insightsTab: InsightTabEnum.EXPENSE,
+        type: TransactionType.EXPENSE,
+        groupByCategory: false,
+        categoryId: id,
+      );
+    }
+
     return InsightTabBase(
         getInsightEventInitial: _getInsightEventInitial,
+        getByCategory: _getByCategory,
         pieChartText: "Gasto total",
         lineChartText: "Gasto por mês",
         tabEnum: InsightTabEnum.EXPENSE);
