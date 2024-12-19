@@ -70,7 +70,7 @@ class TransactionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Slidable(
-      key: const ValueKey(2),
+      key: UniqueKey(),
       closeOnScroll: true,
       startActionPane: ActionPane(
         motion: const StretchMotion(),
@@ -154,25 +154,6 @@ class TransactionTile extends StatelessWidget {
               ],
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildIsPaidBadge() {
-    return Container(
-      width: 80,
-      height: 20,
-      decoration: BoxDecoration(
-          color: transaction.isPaid == true
-              ? ThemeColors.semanticGreen
-              : ThemeColors.semanticRed,
-          borderRadius: BorderRadius.circular(50)),
-      child: Center(
-        child: Text(
-          transaction.isPaid == true ? "Pago" : "Não pago",
-          style:
-              TypographyStyles.label3().copyWith(color: ThemeColors.primary3),
         ),
       ),
     );

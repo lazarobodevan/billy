@@ -33,7 +33,7 @@ class _DatePickerState extends State<DatePicker> {
       ),
     ).then((value) {
       setState(() {
-        _dateTime = value!;
+        _dateTime = value ?? _dateTime;
         widget.onSelect(_dateTime!);
       });
     });

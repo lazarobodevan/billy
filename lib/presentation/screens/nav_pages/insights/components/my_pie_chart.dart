@@ -84,7 +84,7 @@ class MyPieChart extends StatelessWidget {
                           SizedBox(
                             width: MediaQuery.of(context).size.width * .35,
                             child: AutoSizeText(
-                              "R\$${insight!.totalExpent}",
+                              "R\$${insight.totalExpent.toStringAsFixed(2)}",
                               style: TypographyStyles.headline3(),
                               textAlign: TextAlign.center,
                               maxLines: 1,

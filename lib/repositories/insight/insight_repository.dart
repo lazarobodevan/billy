@@ -33,7 +33,7 @@ class InsightRepository extends IInsightRepository {
         LEFT JOIN subcategories ON transactions.subcategory_id = subcategories.id
         WHERE transactions.type_id = ${TransactionTypeExtension.toDatabase(type!)}
         AND transactions.date >= ?
-        AND (transactions.end_date IS NULL OR transactions.end_date <= ?)
+        AND transactions.date <= ?
         GROUP BY categories.id, categories.name, categories.color, categories.icon
         '''
         : '''
@@ -52,9 +52,9 @@ class InsightRepository extends IInsightRepository {
         LEFT JOIN subcategories ON transactions.subcategory_id = subcategories.id
         WHERE transactions.type_id = ${TransactionTypeExtension.toDatabase(type!)}
         AND subcategories.id IS NOT NULL
-        AND categories.id = $categoryId  -- Substitua :desired_category_id pelo ID da categoria desejada
+        AND categories.id = $categoryId  
         AND transactions.date >= ?
-        AND (transactions.end_date IS NULL OR transactions.end_date <= ?)
+        AND transactions.date <= ?
         GROUP BY subcategories.id, subcategories.name, subcategories.color, subcategories.icon, categories.name, categories.color
         
         UNION ALL
@@ -79,9 +79,9 @@ class InsightRepository extends IInsightRepository {
         LEFT JOIN categories ON transactions.category_id = categories.id
         WHERE transactions.type_id = ${TransactionTypeExtension.toDatabase(type!)}
         AND transactions.subcategory_id IS NULL
-        AND categories.id = $categoryId  -- Substitua :desired_category_id pelo ID da categoria desejada
+        AND categories.id = $categoryId
         AND transactions.date >= ?
-        AND (transactions.end_date IS NULL OR transactions.end_date <= ?)
+        AND transactions.date <= ?
         GROUP BY categories.id, categories.color, categories.icon, categories.name;
         ''';
 

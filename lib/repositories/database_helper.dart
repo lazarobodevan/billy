@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:billy/utils/date_utils.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -27,14 +28,11 @@ class DatabaseHelper {
   Future<Database> _initDatabase() async {
     final dbPath = await getDbPath();
 
-    final database = await openDatabase(
-      dbPath,
-      version: 3,
-      onCreate: _onCreate,
-      onUpgrade: (database, al, el){
-        createCreditCardInvoicesTable(database);
-      }
-    );
+    final database = await openDatabase(dbPath,
+        version: 2,
+        onCreate: _onCreate,
+        onUpgrade: (db, al, el) async {},
+        onDowngrade: (db, old, n) {});
     return database;
   }
 
@@ -65,7 +63,6 @@ class DatabaseHelper {
   }
 
   Future<void> _onCreate(Database db, int version) async {
-
     createTransactionsTable(db);
     createCategoriesTable(db);
     createSubcategoriesTable(db);
@@ -89,13 +86,13 @@ class DatabaseHelper {
         value REAL NOT NULL,
         type_id INT NOT NULL,
         payment_method_id INT NOT NULL,
-        paid INTEGER,
         date TEXT NOT NULL,
-        end_date TEXT,
+        invoice_id INTEGER,
         FOREIGN KEY (type_id) REFERENCES transaction_types(id),
         FOREIGN KEY (payment_method_id) REFERENCES payment_methods(id),
         FOREIGN KEY (category_id) REFERENCES categories(id),
-        FOREIGN KEY (subcategory_id) REFERENCES subcategories(id)
+        FOREIGN KEY (subcategory_id) REFERENCES subcategories(id),
+        FOREIGN KEY (invoice_id) REFERENCES credit_card_invoices(id)
       );
     ''');
   }
@@ -131,12 +128,13 @@ class DatabaseHelper {
       CREATE TABLE balance (
         credit_limit REAL DEFAULT 0,
         credit_limit_used REAL DEFAULT 0,
-        balance REAL DEFAULT 0
+        balance REAL DEFAULT 0,
+        invoice_pay_day INTEGER NOT NULL DEFAULT 1
       );
     ''');
   }
 
-  Future<void> createTransactionTypesTable(Database db) async{
+  Future<void> createTransactionTypesTable(Database db) async {
     db.execute('''
       CREATE TABLE transaction_types (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -145,7 +143,7 @@ class DatabaseHelper {
     ''');
   }
 
-  Future<void> createPaymentMethodsTable(Database db) async{
+  Future<void> createPaymentMethodsTable(Database db) async {
     db.execute('''
       CREATE TABLE payment_methods (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -154,7 +152,7 @@ class DatabaseHelper {
     ''');
   }
 
-  Future<void> createGoalsTable(Database db) async{
+  Future<void> createGoalsTable(Database db) async {
     db.execute('''
       CREATE TABLE goals(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -166,7 +164,7 @@ class DatabaseHelper {
     ''');
   }
 
-  Future<void> createLimitsTable(Database db) async{
+  Future<void> createLimitsTable(Database db) async {
     db.execute('''
       CREATE TABLE limits(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -187,13 +185,14 @@ class DatabaseHelper {
     ''');
   }
 
-  Future<void> createCreditCardInvoicesTable(Database db) async{
+  Future<void> createCreditCardInvoicesTable(Database db) async {
     db.execute('''
       CREATE TABLE credit_card_invoices(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         total REAL NOT NULL DEFAULT 0,
         begin_date TEXT NOT NULL,
-        end_date TEXT NOT NULL
+        end_date TEXT NOT NULL,
+        paid INTEGER NOT NULL DEFAULT 0
       )
     ''');
   }
@@ -210,7 +209,18 @@ class DatabaseHelper {
     await db.insert('payment_methods', {'name': 'MONEY'});
 
     //DEFAULT BALANCE
-    await db.insert(
-        'balance', {'credit_limit': 0, 'credit_limit_used': 0, 'balance': 0});
+    await db.insert('balance', {
+      'credit_limit': 0,
+      'credit_limit_used': 0,
+      'balance': 0,
+    });
+
+    //DEFAULT CREDIT CARD INVOICE
+    await db.insert('credit_card_invoices', {
+      'id': 1,
+      'total': 0,
+      'begin_date': MyDateUtils.getFirstDayOfMonth().toIso8601String(),
+      'end_date': MyDateUtils.getLastDayOfMonth().toIso8601String()
+    });
   }
 }

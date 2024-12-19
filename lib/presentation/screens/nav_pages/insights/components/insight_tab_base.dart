@@ -27,12 +27,13 @@ class InsightTabBase extends StatefulWidget {
   final String lineChartText;
   final InsightTabEnum tabEnum;
 
-  const InsightTabBase({super.key,
-    required this.getInsightEventInitial,
-    required this.pieChartText,
-    required this.lineChartText,
-    required this.tabEnum,
-    required this.getByCategory});
+  const InsightTabBase(
+      {super.key,
+      required this.getInsightEventInitial,
+      required this.pieChartText,
+      required this.lineChartText,
+      required this.tabEnum,
+      required this.getByCategory});
 
   @override
   State<InsightTabBase> createState() => _InsightTabBaseState();
@@ -50,7 +51,7 @@ class _InsightTabBaseState extends State<InsightTabBase>
     BlocProvider.of<InsightsBloc>(context).add(widget.getByCategory(id));
   }
 
-  void getByCategory(){
+  void getByCategory() {
     print("oi");
     BlocProvider.of<InsightsBloc>(context).add(widget.getInsightEventInitial());
   }
@@ -69,8 +70,7 @@ class _InsightTabBaseState extends State<InsightTabBase>
 
   List<MyLineChartSpots> _getLineSpots(MyLineChartData data) {
     var result = data.spots
-        .map((chartSpot) =>
-        MyLineChartSpots(
+        .map((chartSpot) => MyLineChartSpots(
             spots: chartSpot.spots,
             lineColor: _getChartLineColor(chartSpot.transactionType),
             transactionType: chartSpot.transactionType))
@@ -123,34 +123,39 @@ class _InsightTabBaseState extends State<InsightTabBase>
                 child: Stack(
                   children: [
                     //RESET BUTTON
-                      BlocBuilder<InsightsBloc, InsightsState>(
-                        builder: (context, state) {
-                          if (getShowResetButton()) {
-                            return Positioned(
-                                top: 8,
-                                right: 8,
-                                child: Align(
-                                  alignment: Alignment.topRight,
-                                  child: GestureDetector(
-                                    onTap: (){print("oooooo");},
-                                    child: Container(
-                                        decoration: const BoxDecoration(
-                                          color: Colors.blue,
-                                          shape: BoxShape.circle, // Forma circular para garantir clique em bordas.
-                                        ),
-                                      width: 40,
-                                      height: 40,
-                                      child: Center(
-                                        child: const Icon(
-                                            Icons.restart_alt_rounded, size: 10,),
-                                      )),
-                                  ),
-                                ),
-                                );
-                          }
-                          return const SizedBox.shrink();
-                        },
-                      ),
+                    BlocBuilder<InsightsBloc, InsightsState>(
+                      builder: (context, state) {
+                        if (getShowResetButton()) {
+                          return Positioned(
+                            top: 8,
+                            right: 8,
+                            child: Align(
+                              alignment: Alignment.topRight,
+                              child: GestureDetector(
+                                onTap: () {
+                                  print("oooooo");
+                                },
+                                child: Container(
+                                    decoration: const BoxDecoration(
+                                      color: Colors.blue,
+                                      shape: BoxShape
+                                          .circle, // Forma circular para garantir clique em bordas.
+                                    ),
+                                    width: 40,
+                                    height: 40,
+                                    child: Center(
+                                      child: const Icon(
+                                        Icons.restart_alt_rounded,
+                                        size: 10,
+                                      ),
+                                    )),
+                              ),
+                            ),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
 
                     //PIE CHART
                     MyPieChart(
@@ -171,24 +176,24 @@ class _InsightTabBaseState extends State<InsightTabBase>
               BlocBuilder<InsightsBloc, InsightsState>(
                 builder: (context, state) {
                   var bloc = BlocProvider.of<InsightsBloc>(context);
-                  var insights = widget.tabEnum == InsightTabEnum.INCOME ? bloc.incomeInsight : bloc.expensesInsight;
+                  var insights = widget.tabEnum == InsightTabEnum.INCOME
+                      ? bloc.incomeInsight
+                      : bloc.expensesInsight;
                   if (state is LoadedInsights) {
                     if (insights.insightsByCategory.isNotEmpty) {
                       return Column(
                         children: insights.insightsByCategory
-                            .map((el) =>
-                            CategoryItemInsight(
-                              value: el.value,
-                              percentage:
-                              ((el.value / insights.totalExpent) *
-                                  100)
-                                  .toInt(),
-                              category: el.category,
-                              onTap: () {
-                                bloc.add(
-                                    widget.getByCategory(el.category.id!));
-                              },
-                            ))
+                            .map((el) => CategoryItemInsight(
+                                  value: el.value,
+                                  percentage:
+                                      ((el.value / insights.totalExpent) * 100)
+                                          .toInt(),
+                                  category: el.category,
+                                  onTap: () {
+                                    bloc.add(
+                                        widget.getByCategory(el.category.id!));
+                                  },
+                                ))
                             .toList(),
                       );
                     }
@@ -196,16 +201,15 @@ class _InsightTabBaseState extends State<InsightTabBase>
                     if (state.insight.insightsBySubcategory.isNotEmpty) {
                       return Column(
                         children: state.insight.insightsBySubcategory!
-                            .map((el) =>
-                            CategoryItemInsight(
-                              value: el.value,
-                              percentage:
-                              ((el.value / state.insight.totalExpent) *
-                                  100)
-                                  .toInt(),
-                              subcategory: el.subcategory,
-                              onTap: () {},
-                            ))
+                            .map((el) => CategoryItemInsight(
+                                  value: el.value,
+                                  percentage:
+                                      ((el.value / state.insight.totalExpent) *
+                                              100)
+                                          .toInt(),
+                                  subcategory: el.subcategory,
+                                  onTap: () {},
+                                ))
                             .toList(),
                       );
                     }

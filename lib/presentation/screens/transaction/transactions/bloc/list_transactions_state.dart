@@ -10,6 +10,9 @@ class ListTransactionsInitial extends ListTransactionsState {
 }
 
 class LoadingTransactionsDataState extends ListTransactionsState {
+  final bool isFirstFetch;
+
+  const LoadingTransactionsDataState({this.isFirstFetch = false});
   @override
   List<Object> get props => [];
 }

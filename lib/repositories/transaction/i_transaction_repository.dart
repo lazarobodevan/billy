@@ -11,10 +11,10 @@ abstract class ITransactionRepository {
 
   Future<Map<DateTime, List<Transaction>>> getAllGroupedByDate({
     int limit = 10,
-    int offset = 0,
+    int pageNumber = 0,
   });
 
   Future<List<String>> getAvailablePeriods();
 
-  Future<Transaction?> getById(id);
+  Future<Transaction?> getById(int id);
 }

@@ -1,3 +1,4 @@
+import 'package:billy/presentation/screens/credit_card_invoices/bloc/credit_card_invoice_bloc.dart';
 import 'package:billy/presentation/screens/nav_pages/home/bloc/home_bloc.dart';
 import 'package:billy/presentation/screens/nav_pages/home/home.dart';
 import 'package:billy/presentation/screens/nav_pages/insights/insights.dart';
@@ -18,6 +19,7 @@ class NavigationPage extends StatefulWidget {
 }
 
 class _NavigationPageState extends State<NavigationPage> {
+
   List pages = [
     _buildHome(),
     Insights(),
@@ -38,6 +40,12 @@ class _NavigationPageState extends State<NavigationPage> {
   }
 
   int currentIndex = 0;
+
+  @override
+  void initState() {
+    BlocProvider.of<CreditCardInvoiceBloc>(context).add(InvoiceInitialCheckEvent());
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

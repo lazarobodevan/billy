@@ -5,6 +5,10 @@ abstract class ListTransactionsEvent extends Equatable {
 }
 
 class LoadTransactionsEvent extends ListTransactionsEvent{
+  final bool? isFirstFetch;
+
+  const LoadTransactionsEvent({this.isFirstFetch = false});
+
   @override
   List<Object?> get props => [];
 

@@ -8,6 +8,7 @@ import 'package:billy/presentation/shared/components/action_button.dart';
 import 'package:billy/presentation/shared/components/date_picker.dart';
 import 'package:billy/presentation/theme/colors.dart';
 import 'package:billy/presentation/theme/typography.dart';
+import 'package:billy/services/toast_service/toast_service.dart';
 import 'package:billy/utils/currency_formatter.dart';
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/cupertino.dart';
@@ -51,132 +52,118 @@ class _TransactionEditorState extends State<TransactionEditor> {
         backgroundColor: ThemeColors.primary2,
       ),
       backgroundColor: ThemeColors.primary2,
-      body: BlocBuilder<TransactionBloc, TransactionState>(
-        builder: (context, state) {
-          final bloc = BlocProvider.of<TransactionBloc>(context);
+      body: BlocListener<TransactionBloc, TransactionState>(
+        listener: (context, state) {
+          if (state is SavedTransactionToDatabaseState) {
+            Navigator.of(context).pop();
+            ToastService.showSuccess(message: "Transação atualizada");
+          }
+        },
+        child: BlocBuilder<TransactionBloc, TransactionState>(
+          builder: (context, state) {
+            final bloc = BlocProvider.of<TransactionBloc>(context);
 
-          var isPaid = bloc.transaction.isPaid ?? false;
-
-          return Column(
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ToggleTransactionType(
-                        onChanged: (val) {
-                          bloc.add(TransactionTypeChangedEvent(
-                              transactionType: val));
-                        },
-                        transactionType: bloc.transaction.type,
-                      ),
-                      const SizedBox(
-                        height: 16,
-                      ),
-                      TextField(
-                        controller: _nameController,
-                        maxLength: 30,
-                        maxLengthEnforcement:
-                            MaxLengthEnforcement.truncateAfterCompositionEnds,
-                        decoration: InputDecoration(
-                          hintText: "Nome da transação",
+            return Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ToggleTransactionType(
+                          onChanged: (val) {
+                            bloc.add(TransactionTypeChangedEvent(
+                                transactionType: val));
+                          },
+                          transactionType: bloc.transaction.type,
                         ),
-                        onChanged: (value) {
-                          bloc.add(TransactionNameChangedEvent(name: value));
-                        },
-                      ),
-                      TextFormField(
-                        controller: _valueController,
-                        decoration: InputDecoration(hintText: "Valor"),
-                        keyboardType: TextInputType.number,
-                        onChanged: (value) {
-                          bloc.add(TransactionValueChangedEvent(value: value));
-                        },
-                        inputFormatters: [
-                          CurrencyTextInputFormatter.currency(
-                            symbol: 'R\$',
-                            decimalDigits: 2,
-                            locale: 'pt_BR',
-                            enableNegative: false,
+                        const SizedBox(
+                          height: 16,
+                        ),
+                        TextField(
+                          controller: _nameController,
+                          maxLength: 30,
+                          maxLengthEnforcement:
+                              MaxLengthEnforcement.truncateAfterCompositionEnds,
+                          decoration: InputDecoration(
+                            hintText: "Nome da transação",
                           ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 16,
-                      ),
-                      PaymentMethodSelector(
-                        selectedPaymentMethod: bloc.transaction.paymentMethod,
-                        selectedCategory: bloc.transaction.category,
-                        onCategoryChanged: (cat) {
-                          bloc.add(
-                              TransactionCategoryChangedEvent(category: cat));
-                          Navigator.of(context).pop();
-                        },
-                        onPaymentMethodChanged: (pay) {
-                          bloc.add(
-                            TransactionPaymentMethodChangedEvent(
-                                paymentMethod: pay),
-                          );
-                        },
-                      ),
-                      const SizedBox(
-                        height: 16,
-                      ),
-                      Row(
-                        children: [
-                          Flexible(
-                              child: DatePicker(
-                            onSelect: (date) {
-                              bloc.add(TransactionDateChangedEvent(date: date));
-                            },
-                            initialDate: DateTime.now(),
-                            label: 'Data',
-                          )),
-                          const SizedBox(
-                            width: 16,
-                          ),
-                          Flexible(
-                              child: DatePicker(
-                            onSelect: (date) {
-                              bloc.add(
-                                  TransactionEndDateChangedEvent(date: date));
-                            },
-                            label: 'Vencimento',
-                          ))
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 16,
-                      ),
-                      if (bloc.transaction.type == TransactionType.EXPENSE)
-                        Column(
-                          children: [
-                            Text('Pago?'),
-                            Switch(
-                              value: isPaid,
-                              onChanged: (val) {
-                                print(bloc.transaction.isPaid);
-                                bloc.add(
-                                  TransactionIsPaidChangedEvent(isPaid: val),
-                                );
-                              },
+                          onChanged: (value) {
+                            bloc.add(TransactionNameChangedEvent(name: value));
+                          },
+                        ),
+                        TextFormField(
+                          controller: _valueController,
+                          decoration: InputDecoration(hintText: "Valor"),
+                          keyboardType: TextInputType.number,
+                          onChanged: (value) {
+                            bloc.add(
+                                TransactionValueChangedEvent(value: value));
+                          },
+                          inputFormatters: [
+                            CurrencyTextInputFormatter.currency(
+                              symbol: 'R\$',
+                              decimalDigits: 2,
+                              locale: 'pt_BR',
+                              enableNegative: false,
                             ),
                           ],
                         ),
-                    ],
+                        const SizedBox(
+                          height: 16,
+                        ),
+                        PaymentMethodSelector(
+                          selectedPaymentMethod: bloc.transaction.paymentMethod,
+                          selectedCategory: bloc.transaction.category,
+                          onCategoryChanged: (cat) {
+                            bloc.add(
+                                TransactionCategoryChangedEvent(category: cat));
+                            Navigator.of(context).pop();
+                          },
+                          onPaymentMethodChanged: (pay) {
+                            bloc.add(
+                              TransactionPaymentMethodChangedEvent(
+                                  paymentMethod: pay),
+                            );
+                          },
+                        ),
+                        const SizedBox(
+                          height: 16,
+                        ),
+                        Row(
+                          children: [
+                            Flexible(
+                                child: DatePicker(
+                              onSelect: (date) {
+                                bloc.add(
+                                    TransactionDateChangedEvent(date: date));
+                              },
+                              initialDate: widget.transaction.date,
+                              label: 'Data',
+                            )),
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 16,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: ActionButton(
-                    text: "Concluir", icon: Icons.edit, onTap: () {bloc.add(UpdateTransactionToDatabaseEvent());}),
-              )
-            ],
-          );
-        },
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: ActionButton(
+                      text: "Concluir",
+                      icon: Icons.edit,
+                      onTap: () {
+                        bloc.add(UpdateTransactionToDatabaseEvent());
+                      }),
+                )
+              ],
+            );
+          },
+        ),
       ),
     );
   }

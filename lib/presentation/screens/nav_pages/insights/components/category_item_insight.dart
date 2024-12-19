@@ -59,7 +59,7 @@ class CategoryItemInsight extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Text(
-                        "R\$$value",
+                        "R\$${value.toStringAsFixed(2)}",
                         style: TypographyStyles.paragraph3(),
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.center,

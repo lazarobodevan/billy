@@ -5,8 +5,10 @@ import 'package:billy/enums/transaction/transaction_type.dart';
 import 'package:billy/models/category/transaction_category.dart';
 import 'package:billy/models/transaction/transaction_model.dart';
 import 'package:billy/repositories/balance/i_balance_repository.dart';
+import 'package:billy/repositories/credit_card_invoices/i_credit_card_invoices_repository.dart';
 import 'package:billy/repositories/transaction/i_transaction_repository.dart';
 import 'package:billy/use_cases/balance/set_balance_use_case.dart';
+import 'package:billy/use_cases/credit_card_invoice/get_or_create_credit_card_invoice_to_transaction.dart';
 import 'package:billy/use_cases/transaction/create_transaction_use_case.dart';
 import 'package:billy/use_cases/transaction/get_all_transactions_use_case.dart';
 import 'package:billy/use_cases/transaction/get_available_periods_use_case.dart';
@@ -21,6 +23,7 @@ part 'transaction_state.dart';
 class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   final ITransactionRepository transactionRepository;
   final IBalanceRepository balanceRepository;
+  final ICreditCardInvoicesRepository invoicesRepository;
 
   //Add new transaction variables
   late final CreateTransactionUseCase _createTransactionUseCase;
@@ -34,19 +37,36 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   late final GetAllTransactionsUseCase _getAllTransactionsUseCase;
   late final UpdateTransactionUseCase _updateTransactionUseCase;
 
+  //Invoice use cases
+  late final GetOrCreateCreditCardInvoiceToTransaction
+      _getOrCreateCreditCardInvoiceToTransaction;
+
   late List<String> periods;
   late List<Transaction> transactions;
 
   TransactionBloc(
-      {required this.transactionRepository, required this.balanceRepository})
+      {required this.transactionRepository,
+      required this.balanceRepository,
+      required this.invoicesRepository})
       : super(TransactionInitial()) {
-
     //****** USE CASES *******
-    _setBalanceUseCase = SetBalanceUseCase(repository: balanceRepository);
+    _setBalanceUseCase = SetBalanceUseCase(
+        repository: balanceRepository,
+        creditCardInvoiceRepository: invoicesRepository);
+
+    _getOrCreateCreditCardInvoiceToTransaction =
+        GetOrCreateCreditCardInvoiceToTransaction(
+            invoicesRepository: invoicesRepository);
+
     _createTransactionUseCase = CreateTransactionUseCase(
         transactionRepository: transactionRepository,
-        setBalanceUseCase: _setBalanceUseCase);
-    _updateTransactionUseCase = UpdateTransactionUseCase(transactionRepository: transactionRepository);
+        balanceRepository: balanceRepository,
+        creditCardInvoiceRepository: invoicesRepository);
+
+    _updateTransactionUseCase = UpdateTransactionUseCase(
+        transactionRepository: transactionRepository,
+        invoicesRepository: invoicesRepository,
+        balanceRepository: balanceRepository);
 
     //****** VARIABLES *******
     amountInCents = 0;
@@ -62,13 +82,15 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     });
 
     on<TransactionValueChangedEvent>((event, emit) {
-      final newValue = double.tryParse(event.value.replaceAll(',', '.').replaceAll("R\$", "")) ?? 0.0;
+      final newValue = double.tryParse(
+              event.value.replaceAll(',', '.').replaceAll("R\$", "")) ??
+          0.0;
       amountInCents = (newValue * 100).round();
       transaction.value = newValue;
       emit(ValueChangedState(value: newValue));
     });
 
-    on<ResetTransaction>((event, emit){
+    on<ResetTransaction>((event, emit) {
       emit(TransactionInitial());
       amountInCents = 0;
       transaction = Transaction.empty();
@@ -94,6 +116,9 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     });
 
     on<TransactionTypeChangedEvent>((event, emit) {
+
+      if(transaction.paymentMethod == PaymentMethod.CREDIT_CARD) return;
+
       transaction = transaction.copyWith(type: event.transactionType);
 
       if (transaction.type == TransactionType.INCOME) {
@@ -105,6 +130,9 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
 
     on<TransactionPaymentMethodChangedEvent>((event, emit) {
       transaction.paymentMethod = event.paymentMethod;
+      if(transaction.paymentMethod == PaymentMethod.CREDIT_CARD){
+        transaction.type = TransactionType.EXPENSE;
+      }
       emit(PaymentMethodChangedState(paymentMethod: transaction.paymentMethod));
     });
 
@@ -116,16 +144,6 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     on<TransactionDateChangedEvent>((event, emit) {
       transaction = transaction.copyWith(date: event.date);
       //TODO: Add emit state
-    });
-
-    on<TransactionEndDateChangedEvent>((event, emit) {
-      transaction = transaction.copyWith(endDate: event.date);
-      //TODO: Add emit state
-    });
-
-    on<TransactionIsPaidChangedEvent>((event, emit) {
-      transaction = transaction.copyWith(isPaid: event.isPaid);
-      emit(TransactionIsPaidChangedState(isPaid: transaction.isPaid!));
     });
 
     on<TransactionNameChangedEvent>((event, emit) {
@@ -140,7 +158,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       emit(SavedTransactionToDatabaseState(transaction: createdTransaction));
     });
 
-    on<UpdateTransactionToDatabaseEvent>((event, emit) async{
+    on<UpdateTransactionToDatabaseEvent>((event, emit) async {
       emit(SavingTransactionToDatabaseState());
       final updated = await _updateTransactionUseCase.execute(transaction);
       emit(SavedTransactionToDatabaseState(transaction: updated));

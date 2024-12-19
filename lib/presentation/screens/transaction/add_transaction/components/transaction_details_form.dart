@@ -27,12 +27,9 @@ class _TransactionDetailsFormState extends State<TransactionDetailsForm> {
   void onSave() {
 
     final bloc = BlocProvider.of<TransactionBloc>(context);
-    bloc.add(TransactionIsPaidChangedEvent(isPaid: isPaid));
     bloc.add(TransactionDateChangedEvent(date: beginDate));
-    bloc.add(TransactionEndDateChangedEvent(date: endDate));
     bloc.add(TransactionNameChangedEvent(name: _controller.text));
     bloc.add(SaveTransactionToDatabaseEvent());
-
     Navigator.of(context).pop();
     Navigator.of(context).pop();
   }
@@ -72,24 +69,6 @@ class _TransactionDetailsFormState extends State<TransactionDetailsForm> {
             ),
             DatePicker(label: "Data", onSelect: onSelectBeginDate, initialDate: beginDate,),
             const SizedBox(height: 10,),
-            if(bloc.transaction.type == TransactionType.EXPENSE)
-              DatePicker(label: "Data de Expiração", onSelect: onSelectEndDate),
-            const SizedBox(height: 10,),
-            if (bloc.transaction.type == TransactionType.EXPENSE)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("Pago?", style: TypographyStyles.label2(),),
-                  Switch(
-                    value: isPaid,
-                    onChanged: (val) {
-                      setState(() {
-                        isPaid = val;
-                      });
-                    },
-                  ),
-                ],
-              ),
           ],
         ),
       ),

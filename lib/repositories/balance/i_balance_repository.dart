@@ -5,4 +5,5 @@ abstract class IBalanceRepository{
   Future<double> setCreditLimit(double limit);
   Future<double> setCreditLimitUsed(double limitUsed);
   Future<double> setBalance(double balance);
+  Future<int> setInvoicePayDay(int day);
 }

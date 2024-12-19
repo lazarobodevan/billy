@@ -1,5 +1,6 @@
 import 'package:billy/models/balance/balance_model.dart';
 import 'package:billy/repositories/balance/i_balance_repository.dart';
+import 'package:googleapis/cloudsearch/v1.dart';
 
 import '../database_helper.dart';
 
@@ -37,6 +38,14 @@ class BalanceRepository implements IBalanceRepository{
     await db.update('balance', {'credit_limit_used':limitUsed});
 
     return limitUsed;
+  }
+
+  @override
+  Future<int> setInvoicePayDay(int day) async{
+    final db = await _databaseHelper.database;
+    await db.update('balance', {'invoice_pay_day':day});
+
+    return day;
   }
 
 }

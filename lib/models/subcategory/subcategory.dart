@@ -56,9 +56,14 @@ class Subcategory {
         id: map['subcategory_id'] ?? map['id'],
         parentId: map['category_id'],
         name: map['subcategory_name'] ?? map['name'],
-        color: map['subcategory_color'] != null ?
-            ColorConverter.intToColor(map['subcategory_color'] ?? map['color']) : null,
-        icon: map['subcategory_icon'] != null ? IconConverter.parseIconFromDb(
-            jsonDecode(map['subcategory_icon'] ?? map['icon'])) : null);
+        color: map['subcategory_color'] != null
+            ? ColorConverter.intToColor(map['subcategory_color'] ??
+                ColorConverter.intToColor(map['color']))
+            : null,
+        icon: map['subcategory_icon'] != null
+            ? IconConverter.parseIconFromDb(jsonDecode(map['subcategory_icon']))
+            : map['icon'] != null
+                ? IconConverter.parseIconFromDb(jsonDecode(map['icon']))
+                : null);
   }
 }

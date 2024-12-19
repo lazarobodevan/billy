@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:billy/models/subcategory/subcategory.dart';
+import 'package:billy/utils/color_utils.dart';
 import 'package:billy/utils/icon_converter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iconpicker/flutter_iconpicker.dart';
@@ -67,7 +68,7 @@ class TransactionCategory {
     if (map['category_color'] != null) {
       return ColorConverter.intToColor(map['category_color']);
     } else if (map['color'] != null) {
-      return map['color'];
+      return ColorConverter.intToColor(map['color']);
     }
     return Colors.orange;
   }
@@ -76,7 +77,7 @@ class TransactionCategory {
     if (map['category_icon'] != null) {
       return IconConverter.parseIconFromDb(jsonDecode(map['category_icon']));
     } else if (map['icon'] != null) {
-      return map['icon'];
+      return IconConverter.parseIconFromDb(jsonDecode(map['icon']));
     }
     return Icons.question_mark;
   }

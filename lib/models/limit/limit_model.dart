@@ -137,7 +137,7 @@ class LimitModel {
     return LimitModel(
       id: map['id'],
       maxValue: map['max_value'],
-      currentValue: map['current_value'],
+      currentValue: map['current_value'] ?? map['max_value'],
       limitType: LimitModel._getLimitType(
         category: category,
         subcategory: subcategory,

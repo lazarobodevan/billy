@@ -7,8 +7,8 @@ class ListTransactionsByDateUseCase{
 
   const ListTransactionsByDateUseCase({required this.transactionRepository});
 
-  Future<Map<DateTime, List<Transaction>>> execute({int limit = 10, int offset = 0}) async{
-    return await transactionRepository.getAllGroupedByDate(limit: limit, offset: offset);
+  Future<Map<DateTime, List<Transaction>>> execute({int limit = 10, int pageNumber = 0}) async{
+    return await transactionRepository.getAllGroupedByDate(limit: limit, pageNumber: pageNumber);
   }
 
 }

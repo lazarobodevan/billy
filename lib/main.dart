@@ -3,6 +3,7 @@ import 'package:billy/presentation/screens/backup_and_restore/bloc/drive_backup_
 import 'package:billy/presentation/screens/balance_editor/bloc/balance_bloc.dart';
 import 'package:billy/presentation/screens/categories/category_bloc/category_bloc.dart';
 import 'package:billy/presentation/screens/categories/subcategory_bloc/subcategory_bloc.dart';
+import 'package:billy/presentation/screens/credit_card_invoices/bloc/credit_card_invoice_bloc.dart';
 import 'package:billy/presentation/screens/limits/bloc/limits_bloc.dart';
 import 'package:billy/presentation/screens/limits/limit_editor/widgets/limit_picker/bloc/limit_picker_bloc.dart';
 import 'package:billy/presentation/screens/nav_pages/nav_page.dart';
@@ -11,11 +12,13 @@ import 'package:billy/presentation/screens/transaction/transactions/bloc/list_tr
 import 'package:billy/presentation/shared/blocs/google_auth_bloc/google_auth_bloc.dart';
 import 'package:billy/repositories/balance/balance_repository.dart';
 import 'package:billy/repositories/category/category_repository.dart';
+import 'package:billy/repositories/credit_card_invoices/credit_card_invoices_repository.dart';
 import 'package:billy/repositories/database_helper.dart';
 import 'package:billy/repositories/limit/i_limit_repository.dart';
 import 'package:billy/repositories/limit/limit_repository.dart';
 import 'package:billy/repositories/subcategory/subcategory_repository.dart';
 import 'package:billy/repositories/transaction/transaction_repository.dart';
+import 'package:billy/use_cases/credit_card_invoice/close_credit_card_invoice_use_case.dart';
 import 'package:billy/use_cases/google_drive/google_drive_backup_and_restore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -48,12 +51,15 @@ class MyApp extends StatelessWidget {
         RepositoryProvider(create: (context) => SubcategoryRepository()),
         RepositoryProvider(create: (context) => BalanceRepository()),
         RepositoryProvider(create: (context) => LimitRepository()),
+        RepositoryProvider(create: (context) => CreditCardInvoicesRepository()),
         BlocProvider(
           create: (context) => TransactionBloc(
               transactionRepository:
                   RepositoryProvider.of<TransactionRepository>(context),
               balanceRepository:
-                  RepositoryProvider.of<BalanceRepository>(context)),
+                  RepositoryProvider.of<BalanceRepository>(context),
+              invoicesRepository:
+                  RepositoryProvider.of<CreditCardInvoicesRepository>(context)),
         ),
         BlocProvider(
           create: (context) => CategoryBloc(
@@ -71,7 +77,9 @@ class MyApp extends StatelessWidget {
               transactionRepository:
                   RepositoryProvider.of<TransactionRepository>(context),
               balanceRepository:
-                  RepositoryProvider.of<BalanceRepository>(context)),
+                  RepositoryProvider.of<BalanceRepository>(context),
+              invoicesRepository:
+                  RepositoryProvider.of<CreditCardInvoicesRepository>(context)),
         ),
         BlocProvider(
           create: (context) => DriveBackupBloc(
@@ -81,9 +89,10 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => GoogleAuthBloc()),
         BlocProvider(
           create: (context) => BalanceBloc(
-            balanceRepository:
-                RepositoryProvider.of<BalanceRepository>(context),
-          ),
+              balanceRepository:
+                  RepositoryProvider.of<BalanceRepository>(context),
+              invoicesRepository:
+                  RepositoryProvider.of<CreditCardInvoicesRepository>(context)),
         ),
         BlocProvider(
           create: (context) => LimitsBloc(
@@ -92,10 +101,18 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => LimitPickerBloc(
-            categoryRepository: RepositoryProvider.of<CategoryRepository>(context),
-            subcategoryRepository: RepositoryProvider.of<SubcategoryRepository>(context)
-          ),
+              categoryRepository:
+                  RepositoryProvider.of<CategoryRepository>(context),
+              subcategoryRepository:
+                  RepositoryProvider.of<SubcategoryRepository>(context)),
         ),
+        BlocProvider(
+            create: (context) => CreditCardInvoiceBloc(
+                creditCardInvoicesRepository:
+                    RepositoryProvider.of<CreditCardInvoicesRepository>(
+                        context),
+                balanceRepository:
+                    RepositoryProvider.of<BalanceRepository>(context)))
       ],
       child: MaterialApp(
         title: 'Flutter Demo',
@@ -122,22 +139,7 @@ class MyApp extends StatelessWidget {
         routes: {
           "/transaction": (context) => AddTransaction(),
         },
-        onGenerateRoute: (settings) {
-          //   if (settings.name == '/categories') {
-          //     return MaterialPageRoute(
-          //       builder: (context) => Categories(
-          //         isSelectableCategories: settings.arguments as bool,
-          //       ),
-          //     );
-          //   }
-          //   if (settings.name == '/editTransaction') {
-          //     return MaterialPageRoute(
-          //       builder: (context) => TransactionEditor(
-          //         transaction: settings.arguments as Transaction,
-          //       ),
-          //     );
-          //   }
-        },
+        onGenerateRoute: (settings) {},
       ),
     );
   }

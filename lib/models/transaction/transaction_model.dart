@@ -1,6 +1,7 @@
 import 'package:billy/enums/transaction/payment_method.dart';
 import 'package:billy/enums/transaction/transaction_type.dart';
 import 'package:billy/models/category/transaction_category.dart';
+import 'package:billy/models/credit_card_invoice/credit_card_invoice_model.dart';
 
 class Transaction {
   final int? id;
@@ -10,8 +11,7 @@ class Transaction {
   TransactionType type;
   PaymentMethod paymentMethod;
   DateTime date;
-  DateTime? endDate;
-  bool? isPaid;
+  CreditCardInvoiceModel? invoice;
 
   Transaction(
       {this.id,
@@ -21,8 +21,8 @@ class Transaction {
       required this.type,
       required this.paymentMethod,
       required this.date,
-      this.endDate,
-      this.isPaid});
+        this.invoice
+      });
 
   Transaction.empty({
     this.id,
@@ -32,20 +32,11 @@ class Transaction {
     this.type = TransactionType.EXPENSE,
     this.paymentMethod = PaymentMethod.PIX,
     DateTime? date,
-    this.endDate,
-    this.isPaid,
+    CreditCardInvoiceModel? invoice
   })  : category = TransactionCategory.empty(),
-        date = date ?? DateTime.now();
+        date = date ?? DateTime.now(),
+        invoice = CreditCardInvoiceModel.empty();
 
-  _getIsPaidToDatabase() {
-    if (isPaid == null) return isPaid;
-
-    if (isPaid == true) {
-      return 1;
-    } else {
-      return 0;
-    }
-  }
 
   Transaction copyWith({
     int? id,
@@ -57,6 +48,7 @@ class Transaction {
     DateTime? date,
     DateTime? endDate,
     bool? isPaid,
+    CreditCardInvoiceModel? invoice
   }) {
     return Transaction(
       id: id ?? this.id,
@@ -66,8 +58,7 @@ class Transaction {
       type: type ?? this.type,
       paymentMethod: paymentMethod ?? this.paymentMethod,
       date: date ?? this.date,
-      endDate: endDate ?? this.endDate,
-      isPaid: isPaid ?? this.isPaid,
+      invoice: invoice ?? this.invoice
     );
   }
 
@@ -83,26 +74,20 @@ class Transaction {
       'type_id': TransactionTypeExtension.toDatabase(type),
       'payment_method_id': PaymentMethodExtension.toDatabase(paymentMethod),
       'date': date.toIso8601String(),
-      'end_date': endDate?.toIso8601String(),
-      'paid': _getIsPaidToDatabase()
+      'invoice_id': invoice?.id,
     };
   }
 
   static Transaction fromMap(Map<String, dynamic> map) {
     return Transaction(
       id: map['id'],
-      isPaid: map['paid'] != null
-          ? map['paid'] == 1
-              ? true
-              : false
-          : null,
       name: map['name'],
       value: map['value'],
       category: map['category_id'] != null ? TransactionCategory.fromMap(map) : null,
       type: TransactionTypeExtension.fromString(map['type']),
       paymentMethod: PaymentMethodExtension.fromString(map['payment_method']),
+      invoice: CreditCardInvoiceModel.fromMap(map),
       date: DateTime.parse(map['date']),
-      endDate: map['end_date'] != null ? DateTime.parse(map['end_date']) : null,
     );
   }
 }

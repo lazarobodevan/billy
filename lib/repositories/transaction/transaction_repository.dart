@@ -30,14 +30,6 @@ class TransactionRepository implements ITransactionRepository {
   }) async {
     final db = await _databaseHelper.database;
 
-    final countResult =
-        await db.rawQuery('SELECT COUNT(*) as count FROM transactions');
-    final totalCount =
-        countResult.isNotEmpty ? countResult.first['count'] as int : 0;
-
-    if (offset >= totalCount) {
-      return [];
-    }
 
     final transactions = await db.rawQuery('''
     SELECT 
@@ -49,8 +41,7 @@ class TransactionRepository implements ITransactionRepository {
       transactions.type_id,
       transactions.payment_method_id,
       transactions.date,
-      transactions.end_date,
-      transactions.paid,      
+      transactions.invoice_id,    
       categories.name AS category_name,
       categories.icon AS category_icon,
       categories.color AS category_color,
@@ -76,18 +67,10 @@ class TransactionRepository implements ITransactionRepository {
   @override
   Future<Map<DateTime, List<Transaction>>> getAllGroupedByDate({
     int limit = 10,
-    int offset = 0,
+    int pageNumber = 0,
   }) async {
     final db = await _databaseHelper.database;
-
-    final countResult =
-        await db.rawQuery('SELECT COUNT(*) as count FROM transactions');
-    final totalCount =
-        countResult.isNotEmpty ? countResult.first['count'] as int : 0;
-
-    if (offset >= totalCount) {
-      return {};
-    }
+    int offset = pageNumber * limit;
 
     final transactions = await db.rawQuery('''
         SELECT 
@@ -99,8 +82,7 @@ class TransactionRepository implements ITransactionRepository {
           transactions.type_id,
           transactions.payment_method_id,
           transactions.date,
-          transactions.end_date,
-          transactions.paid,      
+          transactions.invoice_id as invoice_id,
           categories.name AS category_name,
           categories.icon AS category_icon,
           categories.color AS category_color,
@@ -193,9 +175,8 @@ class TransactionRepository implements ITransactionRepository {
         transactions.subcategory_id,
         transactions.type_id,
         transactions.payment_method_id,
-        transactions.date,
-        transactions.end_date,
-        transactions.paid,      
+        transactions.date,     
+        transactions.invoice_id,
         categories.name AS category_name,
         categories.icon AS category_icon,
         categories.color AS category_color,

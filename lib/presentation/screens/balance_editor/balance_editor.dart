@@ -1,4 +1,5 @@
 import 'package:billy/models/balance/balance_model.dart';
+import 'package:billy/presentation/shared/components/date_picker.dart';
 import 'package:billy/presentation/theme/colors.dart';
 import 'package:billy/presentation/theme/typography.dart';
 import 'package:billy/repositories/balance/balance_repository.dart';
@@ -16,32 +17,36 @@ class BalanceEditor extends StatefulWidget {
 
   @override
   State<BalanceEditor> createState() => _BalanceEditorState();
-
 }
 
 class _BalanceEditorState extends State<BalanceEditor> {
+  final CurrencyTextInputFormatter _creditLimitFormatter =
+      CurrencyTextInputFormatter.currency(symbol: "R\$", decimalDigits: 2);
+  final CurrencyTextInputFormatter _creditLimitUsedFormatter =
+      CurrencyTextInputFormatter.currency(symbol: "R\$", decimalDigits: 2);
+  final CurrencyTextInputFormatter _balanceFormatter =
+      CurrencyTextInputFormatter.currency(symbol: "R\$", decimalDigits: 2);
+  int invoicePayDay = 1;
 
-  final CurrencyTextInputFormatter _creditLimitFormatter = CurrencyTextInputFormatter.currency(symbol: "R\$", decimalDigits: 2);
-  final CurrencyTextInputFormatter _creditLimitUsedFormatter = CurrencyTextInputFormatter.currency(symbol: "R\$", decimalDigits: 2);
-  final CurrencyTextInputFormatter _balanceFormatter = CurrencyTextInputFormatter.currency(symbol: "R\$", decimalDigits: 2);
-
-  Balance? getBalanceDouble(){
+  Balance? getBalanceDouble() {
     double balance = _balanceFormatter.getDouble();
     double creditLimit = _creditLimitFormatter.getDouble();
     double creditLimitUsed = _creditLimitUsedFormatter.getDouble();
 
-    return Balance(balance: balance, creditLimit: creditLimit, limitUsed: creditLimitUsed);
-
+    return Balance(
+        balance: balance,
+        creditLimit: creditLimit,
+        limitUsed: creditLimitUsed,
+        invoicePayDay: invoicePayDay);
   }
 
-  void updateBalance(BuildContext context){
-
+  void updateBalance(BuildContext context) {
     Balance? balance = getBalanceDouble();
 
-    if(balance != null) {
-       BlocProvider.of<BalanceBloc>(context).add(
-           UpdateBalanceEvent(balance: balance));
-       ToastService.showSuccess(message: "Dados atualizados!");
+    if (balance != null) {
+      BlocProvider.of<BalanceBloc>(context)
+          .add(UpdateBalanceEvent(balance: balance));
+      ToastService.showSuccess(message: "Dados atualizados!");
       Navigator.of(context).pop();
     }
   }
@@ -51,6 +56,7 @@ class _BalanceEditorState extends State<BalanceEditor> {
     BlocProvider.of<BalanceBloc>(context).add(LoadBalanceEvent());
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,7 +68,12 @@ class _BalanceEditorState extends State<BalanceEditor> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: BlocBuilder<BalanceBloc, BalanceState>(
+        child: BlocConsumer<BalanceBloc, BalanceState>(
+          listener: (context, state){
+            if(state is LoadedBalanceState){
+              invoicePayDay = state.balance.invoicePayDay;
+            }
+          },
             bloc: BlocProvider.of<BalanceBloc>(context),
             builder: (context, state) {
               if (state is LoadingBalanceState) {
@@ -77,38 +88,56 @@ class _BalanceEditorState extends State<BalanceEditor> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     TextFormField(
-                      initialValue: _balanceFormatter.formatDouble(state.balance.balance),
+                      initialValue:
+                          _balanceFormatter.formatDouble(state.balance.balance),
                       decoration:
                           InputDecoration(label: Text("Valor na conta")),
                       keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        _balanceFormatter
-                      ],
+                      inputFormatters: [_balanceFormatter],
                     ),
                     const SizedBox(
                       height: 16,
                     ),
                     TextFormField(
-                      initialValue: _creditLimitFormatter.formatDouble(state.balance.creditLimit),
+                      initialValue: _creditLimitFormatter
+                          .formatDouble(state.balance.creditLimit),
                       decoration:
                           InputDecoration(label: Text("Limite de crédito")),
                       keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        _creditLimitFormatter
-                      ],
+                      inputFormatters: [_creditLimitFormatter],
                     ),
                     const SizedBox(
                       height: 16,
                     ),
                     TextFormField(
-                      initialValue: _creditLimitUsedFormatter.formatDouble(state.balance.limitUsed),
+                      initialValue: _creditLimitUsedFormatter
+                          .formatDouble(state.balance.limitUsed),
                       decoration: InputDecoration(
                           label: Text("Limite de crédito usado")),
                       keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        _creditLimitUsedFormatter
-                      ],
+                      inputFormatters: [_creditLimitUsedFormatter],
                     ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    DropdownButton(
+                        hint: Text("Dia de pagamento da fatura"),
+                        value: invoicePayDay,
+                        isExpanded: true,
+menuMaxHeight: MediaQuery.of(context).size.height * .55,
+                        items: [
+                          ...List.generate(
+                              31,
+                              (index) => DropdownMenuItem(
+                                    value: index + 1,
+                                    child: Text('${index + 1}'),
+                                  ))
+                        ],
+                        onChanged: (val) {
+                          setState(() {
+                            invoicePayDay = val ?? invoicePayDay;
+                          });
+                        }),
                     const SizedBox(
                       height: 16,
                     ),
@@ -125,7 +154,9 @@ class _BalanceEditorState extends State<BalanceEditor> {
                                 Icons.check_circle,
                                 color: ThemeColors.semanticGreen,
                               ),
-                              const SizedBox(width: 5,),
+                              const SizedBox(
+                                width: 5,
+                              ),
                               Text(
                                 "Salvar",
                                 style: TypographyStyles.paragraph3()
