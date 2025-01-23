@@ -51,6 +51,8 @@ dependencies:
   file_picker: ^8.1.2
   permission_handler: ^11.3.1
   fluttertoast: ^8.2.0
+  flutter_native_splash: ^2.3.10
+  flutter_launcher_icons: ^0.13.1
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -73,6 +75,20 @@ dev_dependencies:
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
+
+flutter_native_splash:
+  color: "#FFFFFF"
+  image: assets/logo/splash_icon.png
+  android_12:
+    color: "#FFFFFF"
+    image: assets/logo/splash_icon.png
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/logo/icon.png"
+  background_color: "#92BC1D"
+
 # The following section is specific to Flutter packages.
 flutter:
 
@@ -82,9 +98,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+    - assets/logo/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

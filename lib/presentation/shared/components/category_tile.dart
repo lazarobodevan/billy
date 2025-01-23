@@ -1,4 +1,5 @@
 import 'package:billy/models/category/transaction_category.dart';
+import 'package:billy/presentation/screens/nav_pages/more/screens/categories/category_bloc/category_bloc.dart';
 import 'package:billy/presentation/shared/components/category_editor_dialog.dart';
 import 'package:billy/presentation/theme/colors.dart';
 import 'package:billy/presentation/theme/typography.dart';
@@ -8,7 +9,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
 import '../../../models/subcategory/subcategory.dart';
-import '../../screens/categories/category_bloc/category_bloc.dart';
 
 class CategoryTile extends StatefulWidget {
   final bool? isClickable;

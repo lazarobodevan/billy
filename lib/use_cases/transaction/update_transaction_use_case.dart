@@ -29,6 +29,7 @@ class UpdateTransactionUseCase {
         transaction.paymentMethod != oldTransaction!.paymentMethod;
     var changedTransactionType = transaction.type != oldTransaction.type;
     var changedTransactionDate = oldTransaction.date != transaction.date;
+    var changedTransactionValue = oldTransaction.value != _transaction.value;
 
     //On update paymentMethod
     if (changedPaymentMethod) {
@@ -41,7 +42,11 @@ class UpdateTransactionUseCase {
     }
 
     if(changedTransactionDate && transaction.paymentMethod == PaymentMethod.CREDIT_CARD){
-      _onChangedTransactionDate(oldTransaction, _transaction, accountBalance);
+      await _onChangedTransactionDate(oldTransaction, _transaction, accountBalance);
+    }
+
+    if(changedTransactionValue){
+      await _onChangedTransactionValue(oldTransaction, _transaction, accountBalance);
     }
 
     //Update transaction
@@ -94,8 +99,11 @@ class UpdateTransactionUseCase {
 
   Future<void> _onChangedTransactionType(Transaction oldTransaction, Transaction transaction, Balance accountBalance) async{
 
+    final changedPaymentMethod = oldTransaction.paymentMethod != transaction.paymentMethod;
+
     // If transaction type is not CREDIT_CARD, then update balance
     if (transaction.paymentMethod != PaymentMethod.CREDIT_CARD) {
+
       var newBalanceTotal = accountBalance.balance;
 
       // Desfazer o valor da transação antiga
@@ -137,7 +145,7 @@ class UpdateTransactionUseCase {
 
     if(MyDateUtils.isDateBetween(targetDate: _transaction.date, startDate: mostRecentInvoice.beginDate, endDate: mostRecentInvoice.endDate)){
       final balance = await balanceRepository.getBalance();
-      var newLimitUsed = balance.limitUsed + _transaction.value;
+      var newLimitUsed = balance.limitUsed + _transaction.value - oldTransaction.value;
       await balanceRepository.setCreditLimitUsed(newLimitUsed);
     }
 
@@ -146,5 +154,28 @@ class UpdateTransactionUseCase {
 
 
     return _transaction;
+  }
+
+  Future<void> _onChangedTransactionValue(Transaction oldTransaction, Transaction transaction, Balance accountBalance) async{
+    if(transaction.paymentMethod == PaymentMethod.CREDIT_CARD){
+
+      final mostRecentInvoice = await invoicesRepository.getMostRecent();
+
+      if(MyDateUtils.isDateBetween(targetDate: transaction.date, startDate: mostRecentInvoice.beginDate, endDate: mostRecentInvoice.endDate)){
+        var newLimitUsed = accountBalance.limitUsed + transaction.value - oldTransaction.value;
+        await balanceRepository.setCreditLimitUsed(newLimitUsed);
+      }else{
+
+        final invoice = await invoicesRepository.getById(transaction.invoice!.id!);
+        final newTotal = invoice.total + transaction.value - oldTransaction.value;
+        await invoicesRepository.updateTotal(invoice.id!, newTotal);
+      }
+    }else{
+
+        final newAccountBalance = accountBalance.balance.abs() + transaction.value -
+            oldTransaction.value;
+        await balanceRepository.setBalance(newAccountBalance);
+
+    }
   }
 }

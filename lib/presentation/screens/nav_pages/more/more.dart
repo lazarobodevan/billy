@@ -1,12 +1,13 @@
-import 'package:billy/presentation/screens/backup_and_restore/backup_and_restore_screen.dart';
 import 'package:billy/presentation/screens/balance_editor/balance_editor.dart';
-import 'package:billy/presentation/screens/categories/categories.dart';
-import 'package:billy/presentation/screens/credit_card_invoices/credit_card_invoices.dart';
-import 'package:billy/presentation/screens/limits/limits_screen.dart';
 import 'package:billy/presentation/screens/nav_pages/more/widgets/more_item.dart';
 import 'package:billy/presentation/theme/colors.dart';
 import 'package:billy/services/auth_service/google_auth_service.dart';
 import 'package:flutter/material.dart';
+
+import 'screens/backup_and_restore/backup_and_restore_screen.dart';
+import 'screens/categories/categories.dart';
+import 'screens/credit_card_invoices/credit_card_invoices.dart';
+import 'screens/limits/limits_screen.dart';
 
 class More extends StatelessWidget {
   const More({super.key});

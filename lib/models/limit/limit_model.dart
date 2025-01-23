@@ -131,13 +131,13 @@ class LimitModel {
         ? PaymentMethodExtension.fromIndex(map['payment_method_id'])
         : null;
     final transactionType = map['transaction_type_id'] != null
-        ? TransactionTypeExtension.fromString(map['transaction_type_id'])
+        ? TransactionTypeExtension.fromIndex(map['transaction_type_id'])
         : null;
 
     return LimitModel(
       id: map['id'],
       maxValue: map['max_value'],
-      currentValue: map['current_value'] ?? map['max_value'],
+      currentValue: map['current_value'].toDouble(),
       limitType: LimitModel._getLimitType(
         category: category,
         subcategory: subcategory,

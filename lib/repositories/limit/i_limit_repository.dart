@@ -6,5 +6,6 @@ abstract class ILimitRepository{
   Future<void> delete (int id);
   Future<List<LimitModel>> getAll();
   Future<LimitModel?> getRecent();
-  Future<LimitModel?> getById(int id);
+  Future<LimitModel> getById(int id);
+  Future<double> recalcValueByLimitId(int id);
 }

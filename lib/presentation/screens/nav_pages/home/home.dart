@@ -1,16 +1,12 @@
-import 'dart:math';
 import 'dart:ui';
 
-import 'package:billy/enums/transaction/transaction_type.dart';
-import 'package:billy/models/limit/limit_model.dart';
-import 'package:billy/presentation/screens/limits/bloc/limits_bloc.dart';
+import 'package:billy/presentation/screens/nav_pages/more/screens/limits/bloc/limits_bloc.dart';
 import 'package:billy/presentation/screens/transaction/bloc/transaction_bloc.dart';
 import 'package:billy/presentation/shared/blocs/google_auth_bloc/google_auth_bloc.dart';
 import 'package:billy/presentation/shared/components/action_button.dart';
 import 'package:billy/presentation/shared/components/limit_item.dart';
 import 'package:billy/presentation/theme/colors.dart';
 import 'package:billy/presentation/theme/typography.dart';
-import 'package:billy/repositories/transaction/transaction_repository.dart';
 import 'package:billy/utils/currency_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -226,9 +222,14 @@ class _HomeState extends State<Home> {
                     else
                       Column(
                         children: state.limits.map((el) {
-                          return LimitItem(limit: el);
+                          return Column(
+                            children: [
+                              LimitItem(limit: el),
+                              const SizedBox(height: 6,)
+                            ],
+                          );
                         }).toList(),
-                      )
+                      ),
                   ],
                 ),
               ),

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:billy/presentation/screens/transaction/bloc/transaction_bloc.dart';
 import 'package:billy/presentation/screens/transaction/transactions/bloc/list_transactions_bloc.dart';
 import 'package:billy/presentation/screens/transaction/transactions/widgets/transaction_filters.dart';
 import 'package:billy/presentation/screens/transaction/transactions/widgets/transaction_tile.dart';
@@ -25,18 +26,14 @@ class _TransactionsState extends State<Transactions> {
   void initState() {
     super.initState();
 
-    BlocProvider.of<ListTransactionsBloc>(context).add(const LoadTransactionsEvent(isFirstFetch: true));
+    BlocProvider.of<ListTransactionsBloc>(context)
+        .add(const LoadTransactionsEvent(isFirstFetch: true));
 
     _scrollController.addListener(() {
       if (_scrollController.position.atEdge) {
         if (_scrollController.position.pixels != 0) {
           BlocProvider.of<ListTransactionsBloc>(context)
               .add(LoadTransactionsEvent());
-
-          Timer(Duration(milliseconds: 20),(){
-            _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-          });
-
         }
       }
     });
@@ -84,81 +81,98 @@ class _TransactionsState extends State<Transactions> {
         ),
       ),
       backgroundColor: ThemeColors.primary2,
-      body: CustomScrollView(
-        controller: _scrollController,
-        slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: TransactionFilters(),
+      body: BlocListener<TransactionBloc, TransactionState>(
+        listener: (context, state) {
+          if (state is SavedTransactionToDatabaseState) {
+            final transaction = state.transaction;
+
+            final transactionDate = transaction.date;
+
+            if (bloc.transactions.containsKey(transactionDate)) {
+              final transactions = bloc.transactions[transactionDate];
+              transactions![transactions
+                  .indexWhere((el) => el.id == transaction.id)] = transaction;
+            } else {
+              bloc.transactions[transactionDate]!.add(transaction);
+            }
+            setState(() {});
+          }
+        },
+        child: CustomScrollView(
+          controller: _scrollController,
+          slivers: [
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: TransactionFilters(),
+              ),
             ),
-          ),
-          BlocConsumer<ListTransactionsBloc, ListTransactionsState>(
-            listener: (context, state) {},
-            builder: (context, state) {
-              if (state is LoadingTransactionsDataState && state.isFirstFetch) {
-                return const SliverToBoxAdapter(
-                  child: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              }
-
-              var isLoading = state is LoadingTransactionsDataState;
-
-              final transactionsData = bloc.transactions;
-              if (transactionsData.isEmpty) {
-                return SliverToBoxAdapter(
-                  child: Center(
-                    child: Text(
-                      "Sem transações",
-                      style: TypographyStyles.paragraph3(),
+            BlocConsumer<ListTransactionsBloc, ListTransactionsState>(
+              listener: (context, state) {},
+              builder: (context, state) {
+                if (state is LoadingTransactionsDataState &&
+                    state.isFirstFetch) {
+                  return const SliverToBoxAdapter(
+                    child: Center(
+                      child: CircularProgressIndicator(),
                     ),
+                  );
+                }
+
+                var isLoading = state is LoadingTransactionsDataState;
+
+                var transactionsData = bloc.transactions;
+
+                if (transactionsData.isEmpty) {
+                  return SliverToBoxAdapter(
+                    child: Center(
+                      child: Text(
+                        "Sem transações",
+                        style: TypographyStyles.paragraph3(),
+                      ),
+                    ),
+                  );
+                }
+
+                return SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      if (isLoading && index == transactionsData.length) {
+                        return Center(child: CircularProgressIndicator());
+                      }
+
+                      DateTime date = transactionsData.keys.elementAt(index);
+                      List<Transaction> transactionsForDate =
+                          transactionsData[date]!;
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(
+                                bottom: 8.0, left: 16, top: 8),
+                            child: Text(
+                              formatDate(date),
+                              style: TypographyStyles.paragraph3(),
+                            ),
+                          ),
+                          ...List.generate(
+                            transactionsForDate.length,
+                            (i) => Padding(
+                                padding: const EdgeInsets.only(bottom: 10),
+                                child: TransactionTile(
+                                    transaction: transactionsForDate[i])),
+                          ),
+                        ],
+                      );
+                    },
+                    childCount: transactionsData.length + (isLoading ? 1 : 0),
                   ),
                 );
-              }
-
-              return SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-
-                    if (isLoading && index == transactionsData.length) {
-                      return Center(child: CircularProgressIndicator());
-                    }
-
-                    DateTime date = transactionsData.keys.elementAt(index);
-                    List<Transaction> transactionsForDate =
-                        transactionsData[date]!;
-
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(
-                              bottom: 8.0, left: 16, top: 8),
-                          child: Text(
-                            formatDate(date),
-                            style: TypographyStyles.paragraph3(),
-                          ),
-                        ),
-                        ...List.generate(
-                          transactionsForDate.length,
-                          (i) => Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: TransactionTile(
-                                    transaction: transactionsForDate[i])
-
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                  childCount: transactionsData.length + (isLoading ? 1 : 0),
-                ),
-              );
-            },
-          ),
-        ],
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

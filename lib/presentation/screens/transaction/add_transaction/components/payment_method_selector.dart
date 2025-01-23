@@ -1,7 +1,7 @@
 import 'package:billy/enums/transaction/transaction_type.dart';
 import 'package:billy/models/category/transaction_category.dart';
+import 'package:billy/presentation/screens/nav_pages/more/screens/categories/categories.dart';
 
-import 'package:billy/presentation/screens/categories/categories.dart';
 import 'package:billy/presentation/theme/colors.dart';
 import 'package:billy/presentation/theme/typography.dart';
 import 'package:billy/enums/transaction/payment_method.dart';

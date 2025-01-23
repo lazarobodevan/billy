@@ -120,56 +120,51 @@ class _InsightTabBaseState extends State<InsightTabBase>
                         blurRadius: 10)
                   ],
                 ),
-                child: Stack(
-                  children: [
-                    //RESET BUTTON
-                    BlocBuilder<InsightsBloc, InsightsState>(
-                      builder: (context, state) {
-                        if (getShowResetButton()) {
-                          return Positioned(
-                            top: 8,
-                            right: 8,
-                            child: Align(
-                              alignment: Alignment.topRight,
-                              child: GestureDetector(
-                                onTap: () {
-                                  print("oooooo");
-                                },
-                                child: Container(
-                                    decoration: const BoxDecoration(
-                                      color: Colors.blue,
-                                      shape: BoxShape
-                                          .circle, // Forma circular para garantir clique em bordas.
-                                    ),
-                                    width: 40,
-                                    height: 40,
-                                    child: Center(
-                                      child: const Icon(
-                                        Icons.restart_alt_rounded,
-                                        size: 10,
-                                      ),
-                                    )),
-                              ),
-                            ),
-                          );
-                        }
-                        return const SizedBox.shrink();
-                      },
-                    ),
-
-                    //PIE CHART
-                    MyPieChart(
-                        text: widget.pieChartText,
-                        //insight: insight,
-                        tabEnum: widget.tabEnum,
-                        getInsightEventInitial: widget.getInsightEventInitial),
-                  ],
-                ),
+                child: MyPieChart(
+                    text: widget.pieChartText,
+                    //insight: insight,
+                    tabEnum: widget.tabEnum,
+                    getInsightEventInitial: widget.getInsightEventInitial),
               ),
               const SizedBox(
                 height: 20,
               ),
-              Text("Separação de gastos", style: TypographyStyles.label2()),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("Separação de gastos", style: TypographyStyles.label2()),
+                  //RESET BUTTON
+                  BlocBuilder<InsightsBloc, InsightsState>(
+                    builder: (context, state) {
+                      if (getShowResetButton()) {
+                        return Material(
+                          shape: const CircleBorder(),
+                          elevation: 1,
+                          child: GestureDetector(
+                            onTap: () {
+                              getByCategory();
+                            },
+                            child: Container(
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape
+                                      .circle, // Forma circular para garantir clique em bordas.
+                                ),
+                                width: 40,
+                                height: 40,
+                                child: Center(
+                                  child: const Icon(
+                                    Icons.restart_alt_rounded,
+                                    size: 18,
+                                  ),
+                                )),
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
+                ],
+              ),
               const SizedBox(
                 height: 15,
               ),
