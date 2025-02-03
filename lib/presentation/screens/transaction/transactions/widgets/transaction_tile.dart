@@ -3,6 +3,7 @@ import 'package:billy/models/category/transaction_category.dart';
 import 'package:billy/models/transaction/transaction_model.dart';
 import 'package:billy/presentation/screens/transaction/transaction_editor/transaction_editor.dart';
 import 'package:billy/presentation/screens/transaction/transactions/bloc/list_transactions_bloc.dart';
+import 'package:billy/presentation/shared/components/slide_widget.dart';
 import 'package:billy/presentation/theme/colors.dart';
 import 'package:billy/presentation/theme/typography.dart';
 import 'package:billy/utils/currency_formatter.dart';
@@ -67,47 +68,26 @@ class TransactionTile extends StatelessWidget {
     return formatted;
   }
 
+  onUpdate(BuildContext context){
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) =>
+            TransactionEditor(transaction: transaction)));
+  }
+
+  onDelete(BuildContext context){
+    BlocProvider.of<ListTransactionsBloc>(context)
+        .add(DeleteTransactionEvent(id: transaction.id!));
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Slidable(
-      key: UniqueKey(),
-      closeOnScroll: true,
-      startActionPane: ActionPane(
-        motion: const StretchMotion(),
-        children: [
-          SlidableAction(
-            onPressed: (context) {
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) =>
-                      TransactionEditor(transaction: transaction)));
-            },
-            icon: Icons.edit_outlined,
-            backgroundColor: ThemeColors.semanticYellow,
-            foregroundColor: Colors.white,
-          )
-        ],
-      ),
-      endActionPane: ActionPane(
-        motion: const StretchMotion(),
-        dismissible: DismissiblePane(
-          closeOnCancel: true,
-          confirmDismiss: () async {
-            return true;
-          },
-          onDismissed: () {
-            BlocProvider.of<ListTransactionsBloc>(context)
-                .add(DeleteTransactionEvent(id: transaction.id!));
-          },
-        ),
-        children: [
-          SlidableAction(
-            onPressed: (context) {},
-            icon: Icons.delete_forever_rounded,
-            backgroundColor: ThemeColors.semanticRed,
-            foregroundColor: ThemeColors.primary3,
-          )
-        ],
-      ),
+    return SlideWidget(
+      onUpdate: (){
+        onUpdate(context);
+      },
+      onDelete: (){
+        onDelete(context);
+      },
       child: Container(
         height: 80, // Ajuste a altura conforme necessário
         decoration: BoxDecoration(
