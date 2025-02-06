@@ -1,5 +1,4 @@
 import 'package:billy/enums/transaction/transaction_type.dart';
-import 'package:billy/models/category/transaction_category.dart';
 import 'package:billy/models/transaction/transaction_model.dart';
 import 'package:billy/presentation/screens/transaction/transaction_editor/transaction_editor.dart';
 import 'package:billy/presentation/screens/transaction/transactions/bloc/list_transactions_bloc.dart';
@@ -9,7 +8,6 @@ import 'package:billy/presentation/theme/typography.dart';
 import 'package:billy/utils/currency_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 
 class TransactionTile extends StatelessWidget {
@@ -31,6 +29,22 @@ class TransactionTile extends StatelessWidget {
       return category.color;
     }
     return Colors.grey;
+  }
+
+  String getCategoryOrSubcategoryName(){
+    final category = transaction.category;
+    final subcategory =
+    category?.subcategories != null && category!.subcategories!.isNotEmpty
+        ? category.subcategories!.first
+        : null;
+
+    if (category != null) {
+      if (subcategory != null) {
+        return subcategory.name;
+      }
+      return category.name;
+    }
+    return "Sem categoria";
   }
 
   IconData getCategoryIcon() {
@@ -104,6 +118,7 @@ class TransactionTile extends StatelessWidget {
               children: [
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
                       width: 60,
@@ -121,9 +136,19 @@ class TransactionTile extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Text(
-                      transaction.name,
-                      style: TypographyStyles.label2(),
+                    Flex(
+                      direction: Axis.vertical,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          getCategoryOrSubcategoryName(),
+                          style: TypographyStyles.label2(),
+                        ),
+                        if(transaction.description != null && transaction.description!.isNotEmpty)
+                          Text(transaction.description!, style: TypographyStyles.paragraph4(),),
+
+                      ],
                     )
                   ],
                 ),

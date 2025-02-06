@@ -23,9 +23,9 @@ class InsightRepository extends IInsightRepository {
         ? '''
         -- Agrupamento por categoria
         SELECT 
-          categories.id as group_id,
-          categories.name as group_name,
-          categories.color as group_color,
+          categories.id as group_id, 
+          COALESCE(categories.name, 'Não especificado') as group_name,
+          categories.color as group_color, 
           categories.icon as group_icon,
           SUM(transactions.value) as total_value
         FROM transactions

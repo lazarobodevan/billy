@@ -1,5 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:billy/enums/transaction/payment_method.dart';
+import 'package:billy/enums/transaction/transaction_type.dart';
 import 'package:billy/models/category/transaction_category.dart';
 import 'package:billy/presentation/screens/transaction/add_transaction/components/digit_button.dart';
 import 'package:billy/presentation/screens/transaction/add_transaction/components/payment_method_selector.dart';
@@ -13,8 +14,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-
 class AddTransaction extends StatefulWidget {
+  final TransactionType? transactionType;
+
+  const AddTransaction({super.key, this.transactionType});
+
   @override
   _AddTransactionState createState() => _AddTransactionState();
 }
@@ -25,6 +29,10 @@ class _AddTransactionState extends State<AddTransaction> {
   @override
   void initState() {
     BlocProvider.of<TransactionBloc>(context).add(ResetTransaction());
+    if (widget.transactionType != null) {
+      BlocProvider.of<TransactionBloc>(context).add(TransactionTypeChangedEvent(
+          transactionType: widget.transactionType!));
+    }
     super.initState();
   }
 
@@ -59,8 +67,8 @@ class _AddTransactionState extends State<AddTransaction> {
   }
 
   onSelectPaymentMethod(PaymentMethod paymentMethod) {
-    BlocProvider.of<TransactionBloc>(context)
-        .add(TransactionPaymentMethodChangedEvent(paymentMethod: paymentMethod));
+    BlocProvider.of<TransactionBloc>(context).add(
+        TransactionPaymentMethodChangedEvent(paymentMethod: paymentMethod));
   }
 
   onSelectCategory(TransactionCategory category) {
@@ -96,12 +104,10 @@ class _AddTransactionState extends State<AddTransaction> {
             children: [
               Center(
                   child: ToggleTransactionType(
-                transactionType: BlocProvider.of<TransactionBloc>(context)
-                    .transaction
-                    .type,
-                onChanged: (value) =>
-                    BlocProvider.of<TransactionBloc>(context)
-                        .add(TransactionTypeChangedEvent(transactionType: value)),
+                transactionType:
+                    BlocProvider.of<TransactionBloc>(context).transaction.type,
+                onChanged: (value) => BlocProvider.of<TransactionBloc>(context)
+                    .add(TransactionTypeChangedEvent(transactionType: value)),
               )),
               Container(
                 width: screenSize.width,

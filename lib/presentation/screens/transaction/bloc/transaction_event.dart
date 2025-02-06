@@ -63,13 +63,13 @@ class TransactionValueChangedEvent extends TransactionEvent{
   List<Object?> get props => [value];
 }
 
-class TransactionNameChangedEvent extends TransactionEvent{
-  final String name;
+class TransactionDescriptionChangedEvent extends TransactionEvent{
+  final String description;
 
-  const TransactionNameChangedEvent({required this.name});
+  const TransactionDescriptionChangedEvent({required this.description});
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [description];
 }
 
 class TransactionDateChangedEvent extends TransactionEvent{

@@ -53,14 +53,14 @@ class TransactionCategoryChangedState extends TransactionState{
 
 }
 
-class TransactionNameChangedState extends TransactionState{
+class TransactionDescriptionChangedState extends TransactionState{
 
-  final String name;
+  final String description;
 
-  const TransactionNameChangedState({required this.name});
+  const TransactionDescriptionChangedState({required this.description});
 
   @override
-  List<Object?> get props => [name];
+  List<Object?> get props => [description];
 
 }
 

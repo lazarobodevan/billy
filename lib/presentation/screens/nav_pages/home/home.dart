@@ -1,6 +1,8 @@
 import 'dart:ui';
 
+import 'package:billy/enums/transaction/transaction_type.dart';
 import 'package:billy/presentation/screens/nav_pages/more/screens/limits/bloc/limits_bloc.dart';
+import 'package:billy/presentation/screens/transaction/add_transaction/add_transaction.dart';
 import 'package:billy/presentation/screens/transaction/bloc/transaction_bloc.dart';
 import 'package:billy/presentation/shared/blocs/google_auth_bloc/google_auth_bloc.dart';
 import 'package:billy/presentation/shared/components/action_button.dart';
@@ -191,7 +193,7 @@ class _HomeState extends State<Home> {
                             text: "Pagar",
                             icon: Icons.payments_sharp,
                             onTap: () {
-                              Navigator.of(context).pushNamed("/transaction");
+                              Navigator.of(context).push(MaterialPageRoute(builder: (context)=> AddTransaction(transactionType: TransactionType.EXPENSE,)));
                             },
                           ),
                         ),
@@ -201,7 +203,7 @@ class _HomeState extends State<Home> {
                             text: "Receber",
                             icon: Icons.add_circle,
                             onTap: () {
-                              Navigator.of(context).pushNamed("/transaction");
+                              Navigator.of(context).push(MaterialPageRoute(builder: (context)=> AddTransaction(transactionType: TransactionType.INCOME,)));
                             },
                           ),
                         ),

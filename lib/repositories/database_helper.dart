@@ -29,9 +29,9 @@ class DatabaseHelper {
     final dbPath = await getDbPath();
 
     final database = await openDatabase(dbPath,
-        version: 2,
+        version: 3,
         onCreate: _onCreate,
-        onUpgrade: (db, al, el) async {},
+        onUpgrade: _onUpgrade,
         onDowngrade: (db, old, n) {});
     return database;
   }
@@ -62,6 +62,41 @@ class DatabaseHelper {
     _database = await _initDatabase();
   }
 
+  Future<void> _onUpgrade(Database db, int oldV, int newV) async{
+    if (oldV < 3) {
+      await db.execute('''
+      CREATE TABLE transactions_new (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        description TEXT,  -- Agora pode ser NULL
+        category_id INTEGER,
+        subcategory_id INTEGER,
+        value REAL NOT NULL,
+        type_id INT NOT NULL,
+        payment_method_id INT NOT NULL,
+        date TEXT NOT NULL,
+        invoice_id INTEGER,
+        FOREIGN KEY (type_id) REFERENCES transaction_types(id),
+        FOREIGN KEY (payment_method_id) REFERENCES payment_methods(id),
+        FOREIGN KEY (category_id) REFERENCES categories(id),
+        FOREIGN KEY (subcategory_id) REFERENCES subcategories(id),
+        FOREIGN KEY (invoice_id) REFERENCES credit_card_invoices(id)
+      );
+    ''');
+
+      // Copiar os dados da tabela antiga para a nova
+      await db.execute('''
+      INSERT INTO transactions_new (id, description, category_id, subcategory_id, value, type_id, payment_method_id, date, invoice_id)
+      SELECT id, name, category_id, subcategory_id, value, type_id, payment_method_id, date, invoice_id FROM transactions;
+    ''');
+
+      // Remover a tabela antiga
+      await db.execute('DROP TABLE transactions;');
+
+      // Renomear a nova tabela para 'transactions'
+      await db.execute('ALTER TABLE transactions_new RENAME TO transactions;');
+    }
+  }
+
   Future<void> _onCreate(Database db, int version) async {
     createTransactionsTable(db);
     createCategoriesTable(db);
@@ -80,7 +115,7 @@ class DatabaseHelper {
     db.execute('''
       CREATE TABLE transactions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
+        description TEXT ,
         category_id INTEGER,
         subcategory_id INTEGER,
         value REAL NOT NULL,

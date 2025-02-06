@@ -52,7 +52,6 @@ class _InsightTabBaseState extends State<InsightTabBase>
   }
 
   void getByCategory() {
-    print("oi");
     BlocProvider.of<InsightsBloc>(context).add(widget.getInsightEventInitial());
   }
 
@@ -185,6 +184,7 @@ class _InsightTabBaseState extends State<InsightTabBase>
                                           .toInt(),
                                   category: el.category,
                                   onTap: () {
+                                    if(el.category.id == null) return;
                                     bloc.add(
                                         widget.getByCategory(el.category.id!));
                                   },

@@ -39,6 +39,7 @@ class ExpensesTab extends StatelessWidget {
     }
 
     InsightsEvent _getByCategory(int id) {
+
       var bloc = BlocProvider.of<InsightsBloc>(context);
 
       // Garante que o filtro de período da aba atual sempre será utilizado.

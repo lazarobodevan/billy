@@ -1,6 +1,3 @@
-import 'package:billy/enums/transaction/payment_method.dart';
-import 'package:billy/enums/transaction/transaction_type.dart';
-import 'package:billy/models/category/transaction_category.dart';
 import 'package:billy/models/transaction/transaction_model.dart';
 import 'package:billy/presentation/screens/transaction/add_transaction/components/toggle_transaction_type.dart';
 import 'package:billy/presentation/screens/transaction/bloc/transaction_bloc.dart';
@@ -11,7 +8,6 @@ import 'package:billy/presentation/theme/typography.dart';
 import 'package:billy/services/toast_service/toast_service.dart';
 import 'package:billy/utils/currency_formatter.dart';
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -28,14 +24,14 @@ class TransactionEditor extends StatefulWidget {
 }
 
 class _TransactionEditorState extends State<TransactionEditor> {
-  late TextEditingController _nameController;
+  late TextEditingController _descriptionController;
   late TextEditingController _valueController;
 
   @override
   void initState() {
     BlocProvider.of<TransactionBloc>(context)
         .add(SetTransactionEvent(transaction: widget.transaction));
-    _nameController = TextEditingController(text: widget.transaction.name);
+    _descriptionController = TextEditingController(text: widget.transaction.description);
     _valueController = TextEditingController(
         text: CurrencyFormatter.format(widget.transaction.value));
     super.initState();
@@ -82,20 +78,20 @@ class _TransactionEditorState extends State<TransactionEditor> {
                           height: 16,
                         ),
                         TextField(
-                          controller: _nameController,
+                          controller: _descriptionController,
                           maxLength: 30,
                           maxLengthEnforcement:
                               MaxLengthEnforcement.truncateAfterCompositionEnds,
-                          decoration: InputDecoration(
-                            hintText: "Nome da transação",
+                          decoration: const InputDecoration(
+                            hintText: "Descrição da transação",
                           ),
                           onChanged: (value) {
-                            bloc.add(TransactionNameChangedEvent(name: value));
+                            bloc.add(TransactionDescriptionChangedEvent(description: value));
                           },
                         ),
                         TextFormField(
                           controller: _valueController,
-                          decoration: InputDecoration(hintText: "Valor"),
+                          decoration: const InputDecoration(hintText: "Valor"),
                           keyboardType: TextInputType.number,
                           onChanged: (value) {
                             bloc.add(

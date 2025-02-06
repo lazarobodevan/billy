@@ -1,4 +1,3 @@
-import 'package:billy/enums/transaction/transaction_type.dart';
 import 'package:billy/presentation/screens/transaction/bloc/transaction_bloc.dart';
 import 'package:billy/presentation/shared/components/date_picker.dart';
 import 'package:billy/presentation/theme/colors.dart';
@@ -15,7 +14,6 @@ class TransactionDetailsForm extends StatefulWidget {
 }
 
 class _TransactionDetailsFormState extends State<TransactionDetailsForm> {
-
   TextEditingController _controller = TextEditingController();
   bool isPaid = false;
   DateTime beginDate = DateTime.now();
@@ -23,12 +21,10 @@ class _TransactionDetailsFormState extends State<TransactionDetailsForm> {
 
   FocusNode _focusNode = FocusNode();
 
-
   void onSave() {
-
     final bloc = BlocProvider.of<TransactionBloc>(context);
     bloc.add(TransactionDateChangedEvent(date: beginDate));
-    bloc.add(TransactionNameChangedEvent(name: _controller.text));
+    bloc.add(TransactionDescriptionChangedEvent(description: _controller.text));
     bloc.add(SaveTransactionToDatabaseEvent());
     Navigator.of(context).pop();
     Navigator.of(context).pop();
@@ -38,7 +34,7 @@ class _TransactionDetailsFormState extends State<TransactionDetailsForm> {
     beginDate = datetime;
   }
 
-  void onSelectEndDate(DateTime datetime){
+  void onSelectEndDate(DateTime datetime) {
     endDate = datetime;
   }
 
@@ -47,7 +43,6 @@ class _TransactionDetailsFormState extends State<TransactionDetailsForm> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
     });
-    final bloc = BlocProvider.of<TransactionBloc>(context);
     return AlertDialog(
       title: Text(
         "Detalhes da transação",
@@ -62,13 +57,20 @@ class _TransactionDetailsFormState extends State<TransactionDetailsForm> {
               onChanged: (str) {},
               maxLength: 30,
               maxLengthEnforcement:
-              MaxLengthEnforcement.truncateAfterCompositionEnds,
+                  MaxLengthEnforcement.truncateAfterCompositionEnds,
               style: TypographyStyles.paragraph2(),
-              decoration: InputDecoration(hintText: "Nome da transação"),
+              decoration:
+                  const InputDecoration(hintText: "Descrição da transação"),
               autocorrect: false,
             ),
-            DatePicker(label: "Data", onSelect: onSelectBeginDate, initialDate: beginDate,),
-            const SizedBox(height: 10,),
+            DatePicker(
+              label: "Data",
+              onSelect: onSelectBeginDate,
+              initialDate: beginDate,
+            ),
+            const SizedBox(
+              height: 10,
+            ),
           ],
         ),
       ),

@@ -146,9 +146,9 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       //TODO: Add emit state
     });
 
-    on<TransactionNameChangedEvent>((event, emit) {
-      transaction = transaction.copyWith(name: event.name);
-      emit(TransactionNameChangedState(name: event.name));
+    on<TransactionDescriptionChangedEvent>((event, emit) {
+      transaction = transaction.copyWith(description: event.description);
+      emit(TransactionDescriptionChangedState(description: event.description));
     });
 
     on<SaveTransactionToDatabaseEvent>((event, emit) async {

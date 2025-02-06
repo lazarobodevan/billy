@@ -34,7 +34,7 @@ class TransactionRepository implements ITransactionRepository {
     final transactions = await db.rawQuery('''
     SELECT 
       transactions.id,
-      transactions.name,
+      transactions.description,
       transactions.value,
       transactions.category_id,
       transactions.subcategory_id,
@@ -75,7 +75,7 @@ class TransactionRepository implements ITransactionRepository {
     final transactions = await db.rawQuery('''
         SELECT 
           transactions.id,
-          transactions.name,
+          transactions.description,
           transactions.value,
           transactions.category_id,
           transactions.subcategory_id,
@@ -169,7 +169,7 @@ class TransactionRepository implements ITransactionRepository {
     final found = await database.rawQuery('''
       SELECT 
         transactions.id,
-        transactions.name,
+        transactions.description,
         transactions.value,
         transactions.category_id,
         transactions.subcategory_id,

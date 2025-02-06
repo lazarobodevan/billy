@@ -8,6 +8,7 @@ import 'package:billy/models/subcategory/subcategory.dart';
 import 'package:billy/utils/color_converter.dart';
 import 'package:billy/utils/date_utils.dart';
 import 'package:billy/utils/icon_converter.dart';
+import 'package:flutter/material.dart';
 
 class Insight {
   double totalExpent;
@@ -19,20 +20,21 @@ class Insight {
   Insight(
       {required this.totalExpent,
       required this.insightsByCategory,
-        required this.insightsBySubcategory,
+      required this.insightsBySubcategory,
       required this.lineChartData,
-        required this.period
-      });
+      required this.period});
 
   Insight.empty(
       {this.totalExpent = 0,
       List<CategoryInsight>? insightsByCategory,
-        List<SubcategoryInsight>? insightsBySubcategory,
-        PeriodFilter? period,
+      List<SubcategoryInsight>? insightsBySubcategory,
+      PeriodFilter? period,
       MyLineChartData? lineChartData})
       : insightsByCategory = [],
-  insightsBySubcategory = [],
-        period = PeriodFilter(beginDate: MyDateUtils.getFirstDayOfMonth(), endDate: MyDateUtils.getLastDayOfMonth()),
+        insightsBySubcategory = [],
+        period = PeriodFilter(
+            beginDate: MyDateUtils.getFirstDayOfMonth(),
+            endDate: MyDateUtils.getLastDayOfMonth()),
         lineChartData = MyLineChartData.empty();
 
   static Insight fromMap(List<Map<String, dynamic>> listMap) {
@@ -42,12 +44,16 @@ class Insight {
       insight.totalExpent += (el["total_value"] as num).toDouble();
       insight.insightsByCategory.add(CategoryInsight(
           category: TransactionCategory(
-              id: el['group_id'],
-              name: el['group_name'],
-              color:
-                  ColorConverter.intToColor((el['group_color'] as num).toInt()),
-              icon:
-                  IconConverter.parseIconFromDb(jsonDecode(el['group_icon']))),
+            id: el['group_id'],
+            name: el['group_name'],
+            color: el['group_color'] != null
+                ? ColorConverter.intToColor((el['group_color'] as num).toInt())
+                : Colors.pinkAccent,
+            icon: el['group_icon'] != null
+                ? IconConverter.parseIconFromDb(jsonDecode(el['group_icon']))
+                : IconConverter.parseIconFromDb(
+                    {"pack": "fontAwesomeIcons", "key": "question_mark"}),
+          ),
           value: (el['total_value'] as num).toDouble()));
     });
 
@@ -63,7 +69,8 @@ class Insight {
           subcategory: Subcategory(
             parentId: el["group_id"],
             name: el["group_name"],
-            color: ColorConverter.intToColor((el['group_color'] as num).toInt()),
+            color:
+                ColorConverter.intToColor((el['group_color'] as num).toInt()),
             icon: IconConverter.parseIconFromDb(jsonDecode(el['group_icon'])),
           ),
           value: (el["total_value"] as num).toDouble(),

@@ -5,7 +5,7 @@ import 'package:billy/models/credit_card_invoice/credit_card_invoice_model.dart'
 
 class Transaction {
   final int? id;
-  String name;
+  String? description;
   double value;
   TransactionCategory? category;
   TransactionType type;
@@ -15,56 +15,52 @@ class Transaction {
 
   Transaction(
       {this.id,
-      required this.name,
+      required this.description,
       required this.value,
       required this.category,
       required this.type,
       required this.paymentMethod,
       required this.date,
-        this.invoice
-      });
+      this.invoice});
 
-  Transaction.empty({
-    this.id,
-    this.name = "",
-    this.value = 0,
-    TransactionCategory? category,
-    this.type = TransactionType.EXPENSE,
-    this.paymentMethod = PaymentMethod.PIX,
-    DateTime? date,
-    CreditCardInvoiceModel? invoice
-  })  : category = TransactionCategory.empty(),
+  Transaction.empty(
+      {this.id,
+      this.description = "",
+      this.value = 0,
+      TransactionCategory? category,
+      this.type = TransactionType.EXPENSE,
+      this.paymentMethod = PaymentMethod.PIX,
+      DateTime? date,
+      CreditCardInvoiceModel? invoice})
+      : category = TransactionCategory.empty(),
         date = date ?? DateTime.now(),
         invoice = CreditCardInvoiceModel.empty();
 
-
-  Transaction copyWith({
-    int? id,
-    String? name,
-    double? value,
-    TransactionCategory? category,
-    TransactionType? type,
-    PaymentMethod? paymentMethod,
-    DateTime? date,
-    DateTime? endDate,
-    bool? isPaid,
-    CreditCardInvoiceModel? invoice
-  }) {
+  Transaction copyWith(
+      {int? id,
+      String? description,
+      double? value,
+      TransactionCategory? category,
+      TransactionType? type,
+      PaymentMethod? paymentMethod,
+      DateTime? date,
+      DateTime? endDate,
+      bool? isPaid,
+      CreditCardInvoiceModel? invoice}) {
     return Transaction(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      value: value ?? this.value,
-      category: category ?? this.category,
-      type: type ?? this.type,
-      paymentMethod: paymentMethod ?? this.paymentMethod,
-      date: date ?? this.date,
-      invoice: invoice ?? this.invoice
-    );
+        id: id ?? this.id,
+        description: description ?? this.description,
+        value: value ?? this.value,
+        category: category ?? this.category,
+        type: type ?? this.type,
+        paymentMethod: paymentMethod ?? this.paymentMethod,
+        date: date ?? this.date,
+        invoice: invoice ?? this.invoice);
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'name': name,
+      'description': description != null && description!.isNotEmpty ? description : null,
       'value': value,
       'category_id': category?.id,
       'subcategory_id':
@@ -81,9 +77,10 @@ class Transaction {
   static Transaction fromMap(Map<String, dynamic> map) {
     return Transaction(
       id: map['id'],
-      name: map['name'],
+      description: map['description'],
       value: map['value'],
-      category: map['category_id'] != null ? TransactionCategory.fromMap(map) : null,
+      category:
+          map['category_id'] != null ? TransactionCategory.fromMap(map) : null,
       type: TransactionTypeExtension.fromString(map['type']),
       paymentMethod: PaymentMethodExtension.fromString(map['payment_method']),
       invoice: CreditCardInvoiceModel.fromMap(map),
