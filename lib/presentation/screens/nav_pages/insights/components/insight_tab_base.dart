@@ -184,7 +184,7 @@ class _InsightTabBaseState extends State<InsightTabBase>
                                           .toInt(),
                                   category: el.category,
                                   onTap: () {
-                                    if(el.category.id == null) return;
+                                    if (el.category.id == null) return;
                                     bloc.add(
                                         widget.getByCategory(el.category.id!));
                                   },
@@ -221,16 +221,19 @@ class _InsightTabBaseState extends State<InsightTabBase>
           BlocBuilder<InsightsBloc, InsightsState>(
             builder: (context, state) {
               if (state is LoadedInsights) {
+                bool isIncomeTab = widget.tabEnum == state.tabEnum && widget.tabEnum == InsightTabEnum.INCOME;
                 return MyLineChart(
                   text: widget.lineChartText,
                   lineColor: Colors.red,
                   minX: 0,
                   minY: _getLineChartMinValue(
-                      state.insight.lineChartData.minValue),
+                      isIncomeTab ? bloc.incomesLineChartData.minValue : bloc.expensesLineChartData.minValue),
                   maxX: 11,
                   maxY: _getLineChartMaxValue(
-                      state.insight.lineChartData.maxValue),
-                  spots: _getLineSpots(state.insight.lineChartData),
+                      isIncomeTab ? bloc.incomesLineChartData.maxValue : bloc.expensesLineChartData.maxValue),
+                  spots: _getLineSpots( isIncomeTab
+                      ? bloc.incomesLineChartData
+                      : bloc.expensesLineChartData),
                 );
               }
               return CircularProgressIndicator();

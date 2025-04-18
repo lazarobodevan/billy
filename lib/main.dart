@@ -1,5 +1,5 @@
-
 import 'package:billy/presentation/screens/balance_editor/bloc/balance_bloc.dart';
+import 'package:billy/presentation/screens/bank/screens/add_mass_transactions/bloc/mass_transactions_bloc.dart';
 import 'package:billy/presentation/screens/nav_pages/more/screens/backup_and_restore/bloc/drive_backup_bloc.dart';
 import 'package:billy/presentation/screens/nav_pages/more/screens/categories/category_bloc/category_bloc.dart';
 import 'package:billy/presentation/screens/nav_pages/more/screens/categories/subcategory_bloc/subcategory_bloc.dart';
@@ -17,10 +17,13 @@ import 'package:billy/repositories/database_helper.dart';
 import 'package:billy/repositories/limit/limit_repository.dart';
 import 'package:billy/repositories/subcategory/subcategory_repository.dart';
 import 'package:billy/repositories/transaction/transaction_repository.dart';
+import 'package:billy/services/file_service/file_service.dart';
+import 'package:billy/services/file_service/i_file_service.dart';
 import 'package:billy/use_cases/google_drive/google_drive_backup_and_restore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'firebase_options.dart';
@@ -50,6 +53,7 @@ class MyApp extends StatelessWidget {
         RepositoryProvider(create: (context) => BalanceRepository()),
         RepositoryProvider(create: (context) => LimitRepository()),
         RepositoryProvider(create: (context) => CreditCardInvoicesRepository()),
+        RepositoryProvider<IFileService>(create: (context) => FileService()),
         BlocProvider(
           create: (context) => TransactionBloc(
               transactionRepository:
@@ -82,6 +86,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(
           create: (context) => DriveBackupBloc(
             googleDriveBackupAndRestore: GoogleDriveBackupAndRestore(),
+            secureStorage: FlutterSecureStorage()
           ),
         ),
         BlocProvider(create: (context) => GoogleAuthBloc()),
@@ -105,12 +110,18 @@ class MyApp extends StatelessWidget {
                   RepositoryProvider.of<SubcategoryRepository>(context)),
         ),
         BlocProvider(
-            create: (context) => CreditCardInvoiceBloc(
-                creditCardInvoicesRepository:
-                    RepositoryProvider.of<CreditCardInvoicesRepository>(
-                        context),
-                balanceRepository:
-                    RepositoryProvider.of<BalanceRepository>(context)))
+          create: (context) => CreditCardInvoiceBloc(
+            creditCardInvoicesRepository:
+                RepositoryProvider.of<CreditCardInvoicesRepository>(context),
+            balanceRepository:
+                RepositoryProvider.of<BalanceRepository>(context),
+          ),
+        ),
+        BlocProvider(
+          create: (context) => MassTransactionsBloc(
+            fileService: RepositoryProvider.of<IFileService>(context),
+          ),
+        ),
       ],
       child: MaterialApp(
         title: 'Flutter Demo',
@@ -137,7 +148,6 @@ class MyApp extends StatelessWidget {
         routes: {
           "/transaction": (context) => AddTransaction(),
         },
-        onGenerateRoute: (settings) {},
       ),
     );
   }

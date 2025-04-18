@@ -35,6 +35,7 @@ class InsightRepository extends IInsightRepository {
         AND transactions.date >= ?
         AND transactions.date <= ?
         GROUP BY categories.id, categories.name, categories.color, categories.icon
+        ORDER BY total_value DESC
         '''
         : '''
           -- Agrupamento por subcategoria
@@ -82,7 +83,8 @@ class InsightRepository extends IInsightRepository {
         AND categories.id = $categoryId
         AND transactions.date >= ?
         AND transactions.date <= ?
-        GROUP BY categories.id, categories.color, categories.icon, categories.name;
+        GROUP BY categories.id, categories.color, categories.icon, categories.name
+        ORDER BY total_value DESC;
         ''';
 
     List<Map<String, Object?>> queryResult;

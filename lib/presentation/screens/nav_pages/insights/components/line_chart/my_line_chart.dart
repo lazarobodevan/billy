@@ -64,7 +64,7 @@ class MyLineChart extends StatelessWidget {
                         getTooltipItems: (List<LineBarSpot> touchedSpots) {
                           return touchedSpots.map((LineBarSpot touchedSpot) {
                             return LineTooltipItem(
-                              '${touchedSpot.y}',
+                              touchedSpot.y.toStringAsFixed(2),
                               const TextStyle(
                                 color: Colors.white, // Cor do texto do tooltip
                                 fontWeight: FontWeight.bold,

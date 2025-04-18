@@ -8,12 +8,30 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:intl/intl.dart';
 
 import 'bloc/drive_backup_bloc.dart';
 import 'list_backups_screen.dart';
 
-class BackupAndRestoreScreen extends StatelessWidget {
+class BackupAndRestoreScreen extends StatefulWidget {
   const BackupAndRestoreScreen({super.key});
+
+  @override
+  State<BackupAndRestoreScreen> createState() => _BackupAndRestoreScreenState();
+}
+
+class _BackupAndRestoreScreenState extends State<BackupAndRestoreScreen> {
+
+  @override
+  void initState() {
+    BlocProvider.of<DriveBackupBloc>(context).add(LoadLastBackupDate());
+    super.initState();
+  }
+
+  String formatLastBackupDate(DateTime lastBackup){
+    DateFormat formatter = new DateFormat("dd/MM/yyyy - HH:mm");
+    return "${formatter.format(lastBackup)}h";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,8 +67,8 @@ class BackupAndRestoreScreen extends StatelessWidget {
                         color: ThemeColors.semanticGreen,
                         size: 100,
                       )),
-                      Text(bloc.lastBackup != null
-                          ? "Último backup: ${bloc.lastBackup}"
+                      Text(state is LoadedLastBackupDate && state.lastBackup != null
+                          ? "Último backup: ${formatLastBackupDate(bloc.lastBackup!)}"
                           : "Sem backups"),
                       const SizedBox(
                         height: 16,

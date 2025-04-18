@@ -4,6 +4,12 @@ abstract class DriveBackupEvent extends Equatable {
   const DriveBackupEvent();
 }
 
+class LoadLastBackupDate extends DriveBackupEvent{
+  @override
+  List<Object?> get props => [];
+
+}
+
 class LoginToGoogleEvent extends DriveBackupEvent{
   @override
   List<Object?> get props => [];

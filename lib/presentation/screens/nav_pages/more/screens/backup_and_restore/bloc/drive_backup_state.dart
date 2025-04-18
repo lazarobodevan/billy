@@ -4,7 +4,23 @@ abstract class DriveBackupState extends Equatable {
   const DriveBackupState();
 }
 
-class DriveBackupInitial extends DriveBackupState {
+class DriveBackupInitial extends DriveBackupState{
+  @override
+  List<Object?> get props => [];
+
+}
+
+class LoadingLastBackupDate extends DriveBackupState{
+  @override
+  List<Object?> get props => [];
+
+}
+
+class LoadedLastBackupDate extends DriveBackupState {
+  final DateTime? lastBackup;
+
+  const LoadedLastBackupDate({this.lastBackup});
+
   @override
   List<Object> get props => [];
 }

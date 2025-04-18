@@ -1,11 +1,13 @@
 import 'dart:async';
 
+import 'package:billy/presentation/screens/bank/screens/banks_list/banks_list.dart';
 import 'package:billy/presentation/screens/transaction/bloc/transaction_bloc.dart';
 import 'package:billy/presentation/screens/transaction/transactions/bloc/list_transactions_bloc.dart';
 import 'package:billy/presentation/screens/transaction/transactions/widgets/transaction_filters.dart';
 import 'package:billy/presentation/screens/transaction/transactions/widgets/transaction_tile.dart';
 import 'package:billy/presentation/theme/colors.dart';
 import 'package:billy/presentation/theme/typography.dart';
+import 'package:billy/services/pdf_extractor_service/impl/sicoob_pdf_extractor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -67,6 +69,27 @@ class _TransactionsState extends State<Transactions> {
     }
   }
 
+  void showScanOptions() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: Text("Tipo de documento", style: TypographyStyles.label1(),),
+        actions: [
+          ElevatedButton(
+            onPressed: () {},
+            child: Text("Extrato"),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              //await SicoobPdfExtractor().getTransactionsFromCreditInvoice();
+            },
+            child: Text("Fatura"),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final bloc = BlocProvider.of<ListTransactionsBloc>(context);
@@ -79,6 +102,12 @@ class _TransactionsState extends State<Transactions> {
           "Transações",
           style: TypographyStyles.headline3(),
         ),
+        actions: [
+          IconButton(
+              onPressed: (){
+                Navigator.of(context).push(MaterialPageRoute(builder: (context)=> BanksList()));
+              }, icon: Icon(Icons.document_scanner_outlined))
+        ],
       ),
       backgroundColor: ThemeColors.primary2,
       body: BlocListener<TransactionBloc, TransactionState>(

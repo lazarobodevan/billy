@@ -1,7 +1,6 @@
-import 'dart:async';
-
 import 'package:billy/enums/transaction/transaction_type.dart';
 import 'package:billy/models/insight/insight.dart';
+import 'package:billy/models/insight/line_chart_data.dart';
 import 'package:billy/models/insight/period_filter.dart';
 import 'package:billy/presentation/screens/nav_pages/insights/enums/insight_tab.dart';
 import 'package:billy/presentation/screens/nav_pages/insights/tabs/insights_tab.dart';
@@ -20,6 +19,9 @@ class InsightsBloc extends Bloc<InsightsEvent, InsightsState> {
   late Insight incomeInsight = Insight.empty();
   bool? insightsByCategory = false;
   int? categoryId;
+
+  late MyLineChartData expensesLineChartData;
+  late MyLineChartData incomesLineChartData;
 
   final Map<InsightTabEnum, PeriodFilter> _periodFilters = {};
 
@@ -58,9 +60,11 @@ class InsightsBloc extends Bloc<InsightsEvent, InsightsState> {
 
         if(event.insightsTab == InsightTabEnum.EXPENSE){
           expensesInsight = insight;
+          expensesLineChartData = insight.lineChartData;
         }
         if(event.insightsTab == InsightTabEnum.INCOME){
           incomeInsight = insight;
+          incomesLineChartData = insight.lineChartData;
         }
 
         insightsByCategory = event.groupByCategory;

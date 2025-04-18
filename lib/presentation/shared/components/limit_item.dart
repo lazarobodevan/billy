@@ -72,19 +72,23 @@ class LimitItem extends StatelessWidget {
                     height: 4,
                     color: Colors.grey.shade200,
                   ),
-                  TweenAnimationBuilder(
-                    tween: Tween<double>(begin: 0, end: _getPercentage()),
-                    duration: const Duration(milliseconds: 500),
-                    builder: (context, value, child) {
-                      return Container(
-                        height: 4,
-                        width: MediaQuery.of(context).size.width * (value / 100),
-                        color: _getSemanticColor(),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      return TweenAnimationBuilder(
+                        tween: Tween<double>(begin: 0, end: _getPercentage()),
+                        duration: const Duration(milliseconds: 500),
+                        builder: (context, value, child) {
+                          return Container(
+                            height: 4,
+                            width: constraints.maxWidth * (value / 100),
+                            color: _getSemanticColor(),
+                          );
+                        },
                       );
                     },
                   ),
                 ],
-              )
+              ),
             ],
           ),
         ),

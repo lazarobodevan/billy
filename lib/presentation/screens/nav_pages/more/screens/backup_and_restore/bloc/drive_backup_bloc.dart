@@ -15,22 +15,24 @@ part 'drive_backup_state.dart';
 class DriveBackupBloc extends Bloc<DriveBackupEvent, DriveBackupState> {
   final GoogleDriveBackupAndRestore googleDriveBackupAndRestore;
   final GoogleAuthService googleAuthService = GoogleAuthService();
+  final FlutterSecureStorage secureStorage;
   DateTime? lastBackup;
 
-  DriveBackupBloc({required this.googleDriveBackupAndRestore})
+  DriveBackupBloc({required this.googleDriveBackupAndRestore, required this.secureStorage})
       : super(DriveBackupInitial()) {
 
     //GET LAST BACKUP DATETIME
     Future<void> _initializeLastBackup() async {
       var lastBackupString =
-          await FlutterSecureStorage().read(key: "lastBackup");
+          await secureStorage.read(key: "lastBackup");
       lastBackup =
           lastBackupString != null ? DateTime.tryParse(lastBackupString) : null;
     }
-    _initializeLastBackup();
 
-    on<DriveBackupEvent>((event, emit) {
-      // TODO: implement event handler
+    on<LoadLastBackupDate>((event, emit) async {
+      emit(LoadingLastBackupDate());
+      await _initializeLastBackup();
+      emit(LoadedLastBackupDate(lastBackup: lastBackup));
     });
 
     on<BackupToDriveEvent>((event, emit) async {
@@ -40,7 +42,7 @@ class DriveBackupBloc extends Bloc<DriveBackupEvent, DriveBackupState> {
           await googleAuthService.signInWithGoogle();
         }
         await googleDriveBackupAndRestore.backupDatabase();
-        const FlutterSecureStorage()
+        secureStorage
             .write(key: "lastBackup", value: DateTime.now().toIso8601String());
         lastBackup = DateTime.now();
         emit(BackedUpState());
